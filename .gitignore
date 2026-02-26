@@ -1,0 +1,14 @@
+# Go
+bin/
+vendor/
+*.exe
+*.test
+*.out
+
+# Node
+node_modules/
+.next/
+.env
+
+# OS
+.DS_Store
