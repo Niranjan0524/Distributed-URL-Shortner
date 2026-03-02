@@ -34,20 +34,20 @@ const UrlForm = () => {
   };
 
   return (
-    <section className="flex min-h-[calc(100vh-96px)] items-center justify-center px-4 py-12">
+    <section className="flex min-h-[calc(100vh-96px)] items-center justify-center px-4 py-12 ">
       <div
         className="w-full max-w-lg rounded-2xl border"
         style={{
           background: "#0D0D0D",
-          borderColor: "rgba(255,255,255,0.07)",
-          boxShadow: "0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(180,18,27,0.1)",
+          borderColor: "rgba(180,18,27,0.25)",
+          boxShadow: "0 0 0 1px rgba(220, 245, 31, 0.2), 0 8px 48px rgba(180,18,27,0.18), 0 2px 16px rgba(180,18,27,0.12)",
         }}
       >
 
         {/* ── Tabs ── */}
         <div
           className="flex rounded-t-2xl overflow-hidden border-b"
-          style={{ borderColor: "rgba(255,255,255,0.07)" }}
+          style={{ borderColor: "rgba(197, 189, 189, 0.07)" }}
         >
           <button
             onClick={() => setActiveTab("shorten")}
