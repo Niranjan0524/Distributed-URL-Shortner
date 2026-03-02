@@ -1,3 +1,47 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  /* ── Background ── */
+  --color-bg-primary:   #000000;
+  --color-bg-secondary: #0D0D0D;
+  --color-bg-tertiary:  #1A1A1A;
+
+  /* ── Accent ── */
+  --color-accent-red:   #B4121B;
+  --color-accent-glow:  #D91E28;
+  --color-success:      #22C55E;
+  --color-danger:       #B4121B;
+
+  /* ── Text ── */
+  --color-text-primary: #F8FAFC;
+  --color-text-muted:   #94A3B8;
+
+  /* ── Border ── */
+  --color-border: #2A2A2A;
+
+  /* ── Typography ── */
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body:    "Inter", sans-serif;
+  --font-mono:    "JetBrains Mono", monospace;
+
+  /* ── Shadows ── */
+  --shadow-glow-red: 0 0 20px rgba(180,18,27,0.5), 0 0 60px rgba(180,18,27,0.18);
+}
+
+/* ── Global base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #000000;
+  color: #F8FAFC;
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
