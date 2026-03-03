@@ -5,9 +5,9 @@ const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
-    <div className="px-4 pt-4 pb-2">
+    <div className="fixed top-5 left-0 right-0 z-50 px-4">
       <header
-        className="mx-auto max-w-6xl rounded-2xl border border-border bg-bg-secondary/80 backdrop-blur-xl"
+        className="mx-auto max-w-6xl rounded-2xl border border-border bg-bg-secondary/50 backdrop-blur-xl "
         style={{ boxShadow: "0 4px 32px rgba(0,0,0,0.8), 0 0 0 1px rgba(180,18,27,0.15)" }}
       >
         <div className="flex h-16 items-center justify-between px-6">

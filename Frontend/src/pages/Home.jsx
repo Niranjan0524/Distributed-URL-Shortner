@@ -1,11 +1,13 @@
 import Header from "../components/Header";
-import UrlForm from "../components/urlForm";
+import Homebody from "../components/Homebody";
 
 const Home=()=>{
 
     return <>
         <Header/>
-        <UrlForm/>
+        <Homebody/>
+       
+       
     </>
 }
 
