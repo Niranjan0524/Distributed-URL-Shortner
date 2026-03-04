@@ -1,16 +1,24 @@
 import UrlForm from "./urlForm";
 import UrlHistory from "./UrlHistory";
 import Footer from "./Footer";
-const Homebody=()=>{
+import HeroSection from "./HeroSection";
 
-
-    return (<>
+const Homebody = () => {
+  return (
     <div className="mt-20">
-        <UrlForm/>
-        <UrlHistory/>
-        <Footer/>
+      {/* ── Hero + Form (two-column) ── */}
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="grid grid-cols-1 items-center gap-0 lg:grid-cols-2">
+          <HeroSection />
+          <UrlForm />
         </div>
-    </>)
-}
+      </div>
+
+      {/* ── History & Footer (unchanged) ── */}
+      <UrlHistory />
+      <Footer />
+    </div>
+  );
+};
 
 export default Homebody;

@@ -34,7 +34,7 @@ const UrlForm = () => {
   };
 
   return (
-    <section className="flex min-h-[calc(100vh-96px)] items-center justify-center px-4 py-12 ">
+    <section className="flex items-center justify-center px-4 py-12">
       <div
         className="w-full max-w-lg rounded-2xl border"
         style={{
