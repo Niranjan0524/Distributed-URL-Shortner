@@ -1,5 +1,6 @@
 import UrlForm from "./urlForm";
 import UrlHistory from "./UrlHistory";
+import Footer from "./Footer";
 const Homebody=()=>{
 
 
@@ -7,7 +8,7 @@ const Homebody=()=>{
     <div className="mt-20">
         <UrlForm/>
         <UrlHistory/>
-
+        <Footer/>
         </div>
     </>)
 }
