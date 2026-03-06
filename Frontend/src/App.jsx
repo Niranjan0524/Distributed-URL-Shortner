@@ -1,8 +1,16 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css'
 import Home from './pages/Home.jsx';
 import LoginSignup from './components/LoginSignup.jsx';
 import Page404 from './components/page404.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import { useAuth } from './context/AuthContext';
+
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return null; // or a spinner
+  return user ? children : <Navigate to="/login" replace />;
+};
 
 function App() {
   return (
@@ -12,6 +20,7 @@ function App() {
           <Route path="/"       element={<Home />} />
           <Route path="/login"  element={<LoginSignup />} />
           <Route path="/signup" element={<LoginSignup />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="*" element={<Page404 />} />
         </Routes>
       </div>

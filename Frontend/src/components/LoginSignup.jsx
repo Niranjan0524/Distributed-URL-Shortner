@@ -1,4 +1,6 @@
 import { useState, useCallback } from "react";
+import { useNavigate } from 'react-router-dom';
+import supabase from '../library/supabaseClient';
 
 /* ── Social icon SVGs ── */
 const GoogleIcon = () => (
@@ -13,6 +15,12 @@ const GoogleIcon = () => (
 const FacebookIcon = () => (
   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="#1877F2">
     <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+  </svg>
+);
+
+const GithubIcon = () => (
+  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
   </svg>
 );
 
@@ -51,9 +59,10 @@ const Field = ({ type = "text", placeholder, value, onChange, icon, rightSlot })
 );
 
 /* ── Social button ── */
-const SocialBtn = ({ icon, label }) => (
+const SocialBtn = ({ icon, label, onClick }) => (
   <button
     type="button"
+    onClick={onClick}
     className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold text-text-muted transition-all duration-150 hover:text-text-primary hover:brightness-110"
     style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.08)" }}
   >
@@ -79,6 +88,45 @@ const LoginSignup = () => {
 
   const [fading, setFading] = useState(false);
   const isLogin = mode === "login";
+
+  const navigate = useNavigate();
+const [error, setError] = useState(null);
+const [loading, setLoading] = useState(false);
+
+// Email/password login
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setLoading(true); setError(null);
+  const { error } = await supabase.auth.signInWithPassword({
+    email: loginEmail,
+    password: loginPass,
+  });
+  setLoading(false);
+  if (error) setError(error.message);
+  else navigate('/dashboard');
+};
+
+// Email/password signup
+const handleSignup = async (e) => {
+  e.preventDefault();
+  setLoading(true); setError(null);
+  const { error } = await supabase.auth.signUp({
+    email: signupEmail,
+    password: signupPass,
+    options: { data: { full_name: signupName } }, // stored in user_metadata
+  });
+  setLoading(false);
+  if (error) setError(error.message);
+  else setError("Check your email to confirm your account!");
+};
+
+// OAuth (Google / GitHub / Facebook)
+const handleOAuth = async (provider) => {
+  await supabase.auth.signInWithOAuth({
+    provider, // 'google' | 'github' | 'facebook'
+    options: { redirectTo: window.location.origin + '/dashboard' },
+  });
+};
 
   const switchMode = useCallback((next) => {
     setFading(true);
@@ -128,8 +176,8 @@ const LoginSignup = () => {
 
       {/* Social */}
       <div className="flex gap-3">
-        <SocialBtn cla icon={<GoogleIcon />}   label="Google" />
-        <SocialBtn icon={<FacebookIcon />} label="Facebook" />
+        <SocialBtn icon={<GoogleIcon />} label="Google" onClick={() => handleOAuth('google')} />
+        <SocialBtn icon={<GithubIcon />} label="GitHub" onClick={() => handleOAuth('github')} />
       </div>
 
       <div className="flex items-center gap-3">
@@ -138,7 +186,7 @@ const LoginSignup = () => {
         <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.08)" }} />
       </div>
 
-      <form className="flex flex-col gap-3">
+      <form className="flex flex-col gap-3" onSubmit={handleLogin}>
         <Field
           type="email"
           placeholder="Enter E-mail"
@@ -173,12 +221,15 @@ const LoginSignup = () => {
           </a>
         </div>
 
+        {error && <p className="text-xs text-center" style={{ color: "#D91E28" }}>{error}</p>}
+
         <button
           type="submit"
-          className="w-full cursor-pointer rounded-xl py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-all duration-150 hover:scale-[1.02] hover:brightness-110 active:scale-[0.97]"
+          disabled={loading}
+          className="w-full cursor-pointer rounded-xl py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-all duration-150 hover:scale-[1.02] hover:brightness-110 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ background: "linear-gradient(135deg, #B4121B, #D91E28)", boxShadow: "0 0 24px rgba(180,18,27,0.4)" }}
         >
-          Sign In
+          {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
 
@@ -200,8 +251,8 @@ const LoginSignup = () => {
 
       {/* Social */}
       <div className="flex gap-3">
-        <SocialBtn icon={<GoogleIcon />}   label="Google" />
-        <SocialBtn icon={<FacebookIcon />} label="Facebook" />
+        <SocialBtn icon={<GoogleIcon />} label="Google" onClick={() => handleOAuth('google')} />
+        <SocialBtn icon={<GithubIcon />} label="GitHub" onClick={() => handleOAuth('github')} />
       </div>
 
       <div className="flex items-center gap-3">
@@ -210,7 +261,7 @@ const LoginSignup = () => {
         <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.08)" }} />
       </div>
 
-      <form className="flex flex-col gap-3">
+      <form className="flex flex-col gap-3" onSubmit={handleSignup}>
         <Field
           placeholder="Full Name"
           value={signupName}
@@ -249,12 +300,15 @@ const LoginSignup = () => {
           }
         />
 
+        {error && <p className="text-xs text-center" style={{ color: error.startsWith('Check') ? '#22c55e' : '#D91E28' }}>{error}</p>}
+
         <button
           type="submit"
-          className="mt-1 w-full cursor-pointer rounded-xl py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-all duration-150 hover:scale-[1.02] hover:brightness-110 active:scale-[0.97]"
+          disabled={loading}
+          className="mt-1 w-full cursor-pointer rounded-xl py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-all duration-150 hover:scale-[1.02] hover:brightness-110 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ background: "linear-gradient(135deg, #B4121B, #D91E28)", boxShadow: "0 0 24px rgba(180,18,27,0.4)" }}
         >
-          Sign Up
+          {loading ? "Creating account..." : "Sign Up"}
         </button>
       </form>
 
