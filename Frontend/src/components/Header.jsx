@@ -1,8 +1,21 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import supabase from "../library/supabaseClient";
 
 const Header = () => {
-  // TODO: replace with real auth state (context / zustand / etc.)
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
+  const navigate = useNavigate();
+
+  const displayName =
+    user?.user_metadata?.full_name?.split(" ")[0] ||
+    user?.email?.split("@")[0] ||
+    "U";
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
 
   return (
     <div className="fixed top-4 left-0 right-0 z-50 px-4">
@@ -44,6 +57,14 @@ const Header = () => {
 
             {isLoggedIn ? (
               <>
+                {/* Dashboard */}
+                <a
+                  href="/dashboard"
+                  className="rounded-xl px-3.5 py-1.5 text-[13px] font-medium text-white/50 transition-all duration-200 hover:bg-white/[0.06] hover:text-white/90"
+                >
+                  Dashboard
+                </a>
+
                 {/* Divider */}
                 <div className="mx-2 h-4 w-px bg-white/10" />
 
@@ -54,14 +75,14 @@ const Header = () => {
                     background: "linear-gradient(135deg, #B4121B, #E8212D)",
                     boxShadow: "0 0 12px rgba(180,18,27,0.4)",
                   }}
-                  title="Profile"
+                  title={user?.email}
                 >
-                  P
+                  {displayName[0].toUpperCase()}
                 </button>
 
                 {/* Logout */}
                 <button
-                  onClick={() => setIsLoggedIn(false)}
+                  onClick={handleLogout}
                   className="ml-1 rounded-xl px-3.5 py-1.5 text-[13px] font-medium text-white/40 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
                 >
                   Logout
