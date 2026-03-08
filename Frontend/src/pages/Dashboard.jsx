@@ -224,10 +224,17 @@ const Dashboard = () => {
         />
       </div>
 
-      <div className="relative mx-auto max-w-5xl px-4 py-8">
-
-        {/* ── Top bar ── */}
-        <div className="mb-8 flex items-center justify-between">
+      {/* ── Fixed Header ── */}
+      <header
+        className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.07]"
+        style={{
+          background: "rgba(0,0,0,0.85)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          boxShadow: "0 4px 32px rgba(0,0,0,0.7), 0 1px 0 rgba(180,18,27,0.12)",
+        }}
+      >
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
             <div
               className="flex h-8 w-8 items-center justify-center rounded-xl text-xs font-extrabold text-white"
@@ -262,6 +269,9 @@ const Dashboard = () => {
             </button>
           </div>
         </div>
+      </header>
+
+      <div className="relative mx-auto max-w-5xl px-4 pt-24 pb-8">
 
         {/* ── Greeting ── */}
         <div className="mb-8">
