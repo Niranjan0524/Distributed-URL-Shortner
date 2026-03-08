@@ -4,6 +4,7 @@ import Home from './pages/Home.jsx';
 import LoginSignup from './components/LoginSignup.jsx';
 import Page404 from './components/page404.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import Analytics from './pages/Analytics.jsx';
 import { useAuth } from './context/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
@@ -21,6 +22,8 @@ function App() {
           <Route path="/login"  element={<LoginSignup />} />
           <Route path="/signup" element={<LoginSignup />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          //need to make analytics route private later
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="*" element={<Page404 />} />
         </Routes>
       </div>
