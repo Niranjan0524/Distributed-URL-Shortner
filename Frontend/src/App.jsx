@@ -23,7 +23,7 @@ function App() {
           <Route path="/signup" element={<LoginSignup />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           //need to make analytics route private later
-          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="*" element={<Page404 />} />
         </Routes>
       </div>
