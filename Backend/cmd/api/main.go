@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/Niranjan0524/backend/internal/config"
 	"github.com/Niranjan0524/backend/internal/http/handler/urls"
+	"github.com/Niranjan0524/backend/internal/storage/postgres"
 )
 
 func main() {
@@ -23,6 +25,11 @@ func main() {
 	fmt.Println(cfg)
 
 	//database
+
+	_, err := postgres.New(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	//router
 	router := http.NewServeMux()
