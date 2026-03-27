@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"log/slog"
+	"time"
 
 	"github.com/Niranjan0524/backend/internal/config"
 	_ "github.com/lib/pq"
@@ -50,4 +51,10 @@ func New(cfg *config.Config) (*Postgres, error) {
 	return &Postgres{
 		Db: db,
 	}, nil
+}
+
+func (s *Postgres) ShortenUrl(longUrl string, alias *string, expiresAt *time.Time, userId *string) (string, error) {
+
+	return "This is short url", nil
+
 }

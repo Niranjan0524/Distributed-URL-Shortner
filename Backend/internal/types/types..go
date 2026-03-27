@@ -20,6 +20,8 @@ type Click struct {
 }
 
 type CreateUrlRequest struct {
-	LongUrl string  `json:"longUrl" validate:"required,url"`
-	Alias   *string `json:"alias"`
+	LongUrl   string     `json:"longUrl" validate:"required,url"`
+	Alias     *string    `json:"alias"`
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	UserId    *string    `json:"userId" validate:"required"`
 }

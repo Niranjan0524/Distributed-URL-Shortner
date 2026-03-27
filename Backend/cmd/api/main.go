@@ -26,7 +26,7 @@ func main() {
 
 	//database
 
-	_, err := postgres.New(cfg)
+	storage, err := postgres.New(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,6 +35,7 @@ func main() {
 	router := http.NewServeMux()
 
 	router.HandleFunc("GET /health", urls.HealthCheck())
+	router.HandleFunc("POST /api/shortenUrl", urls.GetShortLink(storage))
 
 	//server
 
