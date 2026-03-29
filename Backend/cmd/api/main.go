@@ -35,8 +35,14 @@ func main() {
 	//router
 	router := http.NewServeMux()
 
+	frontendUrl, exists := os.LookupEnv("FRONTEND_URL")
+
+	if !exists {
+		frontendUrl = "http://localhost:5173"
+	}
+
 	cors := handlers.CORS(
-		handlers.AllowedOrigins([]string{"http://localhost:5173"}),
+		handlers.AllowedOrigins([]string{frontendUrl}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
 		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
 	)

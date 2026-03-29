@@ -19,16 +19,20 @@ const UrlForm = () => {
     console.log("Expiry : ",expiry);
     const backendUrl=import.meta.env.VITE_BACKEND_URL;
     let shortCode;
+
+    const body = {
+      longUrl: url,
+      ...(expiry && {expiresAt:expiry}),
+      ...(alias && { alias: alias }),
+    };
+
     try {
       const res = await fetch(`${backendUrl}/api/shortenUrl`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          longUrl:url,
-          alias:alias          
-        })
+        body: JSON.stringify(body)
       });
 
       shortCode= await res.json();
