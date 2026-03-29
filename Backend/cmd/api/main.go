@@ -14,6 +14,7 @@ import (
 	"github.com/Niranjan0524/backend/internal/config"
 	"github.com/Niranjan0524/backend/internal/http/handler/urls"
 	"github.com/Niranjan0524/backend/internal/storage/postgres"
+	"github.com/gorilla/handlers"
 )
 
 func main() {
@@ -34,6 +35,12 @@ func main() {
 	//router
 	router := http.NewServeMux()
 
+	cors := handlers.CORS(
+		handlers.AllowedOrigins([]string{"http://localhost:5173"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+	)
+
 	router.HandleFunc("GET /health", urls.HealthCheck())
 	router.HandleFunc("POST /api/shortenUrl", urls.GetShortLink(storage))
 
@@ -41,7 +48,7 @@ func main() {
 
 	server := http.Server{
 		Addr:    cfg.Addr,
-		Handler: router,
+		Handler: cors(router),
 	}
 
 	slog.Info("Server Started")

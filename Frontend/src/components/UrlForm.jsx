@@ -9,12 +9,39 @@ const UrlForm = () => {
   const [shortUrl, setShortUrl] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!url.trim()) return;
-    // Placeholder — wire to real API later
-    const generated = `mkitshrt.ly/${alias.trim() || Math.random().toString(36).slice(2, 7)}`;
+
+    
+    console.log("long URL:" , url);
+    console.log("alias : ",alias);
+    console.log("Expiry : ",expiry);
+    const backendUrl=import.meta.env.VITE_BACKEND_URL;
+    let shortCode;
+    try {
+      const res = await fetch(`${backendUrl}/api/shortenUrl`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          longUrl:url,
+          alias:alias          
+        })
+      });
+
+      shortCode= await res.json();
+      console.log("ShortCode",shortCode);
+    } catch (err) {
+      console.error(err);
+    }
+    // // Placeholder — wire to real API later
+    const generated = `mkitshrt.ly/${shortCode || Math.random().toString(36).slice(2, 7)}`;
+
+    
     setShortUrl(generated);
+    console.log(generated)
     setSubmitted(true);
   };
 
