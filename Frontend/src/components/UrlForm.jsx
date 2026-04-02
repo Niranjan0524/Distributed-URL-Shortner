@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import {useAuth} from "../context/AuthContext"
 const UrlForm = () => {
   const [activeTab, setActiveTab] = useState("shorten");
   const [url, setUrl] = useState("");
@@ -8,6 +8,7 @@ const UrlForm = () => {
   const [submitted, setSubmitted] = useState(false);
   const [shortUrl, setShortUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const {getToken}=useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,6 +26,9 @@ const UrlForm = () => {
       ...(expiry && {expiresAt:expiry}),
       ...(alias && { alias: alias }),
     };
+
+    const token=await getToken();
+    // console.log("jwt token:",token);
 
     try {
       const res = await fetch(`${backendUrl}/api/shortenUrl`, {

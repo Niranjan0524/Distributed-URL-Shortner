@@ -6,10 +6,25 @@ import Page404 from './components/page404.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Analytics from './pages/Analytics.jsx';
 import { useAuth } from './context/AuthContext';
+import {Triangle} from 'react-loader-spinner'
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return null; // or a spinner
+  if (loading) 
+    return <div style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh"   // full screen center
+    }}>
+      <Triangle
+        visible={true}
+        height="80"
+        width="80"
+        color="#4fa94d"
+        ariaLabel="triangle-loading"
+      />
+    </div>; // or a spinner
   return user ? children : <Navigate to="/login" replace />;
 };
 

@@ -10,6 +10,9 @@ export const AuthProvider = ({ children }) => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      
+      const token=session?.access_token;
+      // console.log("jwt Token",token);
       setLoading(false);
     });
 
@@ -21,8 +24,14 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const getToken=async()=>{
+
+    const {data} =await supabase.auth?.getSession();
+    return data.session?.access_token;
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading ,getToken}}>
       {children}
     </AuthContext.Provider>
   );

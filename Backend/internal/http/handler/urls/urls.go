@@ -42,7 +42,7 @@ func GetShortLink(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
-		//handle url,alias,expires at format
+		//handle url,alias,expires at format 
 		shortUrl, err := storage.ShortenUrl(urlRequest.LongUrl, urlRequest.Alias, urlRequest.ExpiresAt, urlRequest.UserId)
 
 		if err != nil {
