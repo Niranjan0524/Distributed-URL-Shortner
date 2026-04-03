@@ -1,5 +1,7 @@
 import { useState } from "react";
 import {useAuth} from "../context/AuthContext"
+import toast from "react-hot-toast"
+
 const UrlForm = () => {
   const [activeTab, setActiveTab] = useState("shorten");
   const [url, setUrl] = useState("");
@@ -14,10 +16,7 @@ const UrlForm = () => {
     e.preventDefault();
     if (!url.trim()) return;
 
-    
-    console.log("long URL:" , url);
-    console.log("alias : ",alias);
-    console.log("Expiry : ",expiry);
+  
     const backendUrl=import.meta.env.VITE_BACKEND_URL;
     let shortCode;
 
@@ -34,14 +33,17 @@ const UrlForm = () => {
       const res = await fetch(`${backendUrl}/api/shortenUrl`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "authorization":`bearer ${token}`
         },
         body: JSON.stringify(body)
       });
 
       shortCode= await res.json();
+      toast.success("Short Url generated")
       console.log("ShortCode",shortCode);
     } catch (err) {
+      toast.error("Internal Error");
       console.error(err);
     }
     // // Placeholder — wire to real API later

@@ -6,7 +6,8 @@ import Page404 from './components/page404.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Analytics from './pages/Analytics.jsx';
 import { useAuth } from './context/AuthContext';
-import {Triangle} from 'react-loader-spinner'
+import {Triangle} from 'react-loader-spinner';
+import {Toaster} from 'react-hot-toast';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -24,14 +25,16 @@ const ProtectedRoute = ({ children }) => {
         color="#4fa94d"
         ariaLabel="triangle-loading"
       />
-    </div>; // or a spinner
+    </div>;
   return user ? children : <Navigate to="/login" replace />;
 };
 
 function App() {
   return (
+
     <BrowserRouter>
       <div className="min-h-screen bg-bg-primary font-body text-text-primary">
+            <Toaster/>
         <Routes>
           <Route path="/"       element={<Home />} />
           <Route path="/login"  element={<LoginSignup />} />
@@ -41,8 +44,10 @@ function App() {
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="*" element={<Page404 />} />
         </Routes>
+       
       </div>
     </BrowserRouter>
+    
   )
 }
 

@@ -6,6 +6,8 @@ import {
   FiCopy, FiExternalLink, FiTrash2, FiLink2, FiBarChart2,
   FiPlus, FiCheck, FiLogOut, FiTrendingUp, FiMousePointer, FiCalendar, FiArrowLeft
 } from "react-icons/fi";
+import toast from "react-hot-toast";
+
 
 /* ── Dummy data ── */
 const DUMMY_LINKS = [
@@ -162,6 +164,7 @@ const Dashboard = () => {
   const [copiedId, setCopiedId] = useState(null);
   const [search, setSearch] = useState("");
 
+  const {getToken}=useAuth();
   const displayName =
     user?.user_metadata?.full_name?.split(" ")[0] ||
     user?.email?.split("@")[0] ||
@@ -171,12 +174,43 @@ const Dashboard = () => {
   const topClicks = links.length ? Math.max(...links.map(l => l.clicks)) : 0;
 
   /* ── Shorten (mocked) ── */
-  const handleShorten = (e) => {
+  const handleShorten = async (e) => {
     e.preventDefault();
     if (!inputUrl.trim()) return;
+  
+    const url=inputUrl.trim();
+
     setShortening(true);
-    setTimeout(() => {
-      const code = alias.trim() || Math.random().toString(36).slice(2, 7);
+    const body = {
+      longUrl: url,
+      ...(alias && { alias: alias }),
+    };
+    const token=await getToken();
+
+    if(!token) {
+      toast.error("Please Login/Signup");
+      return ;
+    }
+    const backendUrl=import.meta.env.VITE_BACKEND_URL;
+
+    let code;
+    try{
+      const res=await fetch(`${backendUrl}/api/shortenUrl`,
+        {
+          method: "POST",
+          headers:{
+            "content-Type":"application/json",
+            "authorization":`bearer ${token}`
+          },
+          body: JSON.stringify(body)
+        }
+      )
+
+      code=await res.json();
+      toast.success("Short link is ready..")
+  
+      console.log("ShortCode",code);
+
       setLinks(prev => [
         {
           id: Date.now().toString(),
@@ -189,10 +223,19 @@ const Dashboard = () => {
         },
         ...prev,
       ]);
-      setInputUrl("");
-      setAlias("");
-      setShortening(false);
-    }, 900);
+     
+    }
+    catch(err){
+      toast.error("Internal Error");
+      console.error(err);
+    }
+    finally{
+       setInputUrl("");
+     setAlias("");
+     setShortening(false);
+    }
+
+    
   };
 
   const handleCopy = (link) => {
