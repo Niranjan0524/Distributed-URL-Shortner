@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Niranjan0524/backend/internal/auth"
 	"github.com/Niranjan0524/backend/internal/config"
 	"github.com/Niranjan0524/backend/internal/http/handler/urls"
 	"github.com/Niranjan0524/backend/internal/storage/postgres"
@@ -48,7 +49,7 @@ func main() {
 	)
 
 	router.HandleFunc("GET /health", urls.HealthCheck())
-	router.HandleFunc("POST /api/shortenUrl", urls.GetShortLink(storage))
+	router.HandleFunc("POST /api/shortenUrl", auth.VerifyUser(urls.GetShortLink(storage)))
 
 	//server
 
