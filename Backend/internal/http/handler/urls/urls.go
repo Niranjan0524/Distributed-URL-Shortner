@@ -9,6 +9,7 @@ import (
 
 	"github.com/Niranjan0524/backend/internal/storage"
 	"github.com/Niranjan0524/backend/internal/types"
+	"github.com/Niranjan0524/backend/internal/utils/futureTime"
 	"github.com/Niranjan0524/backend/internal/utils/responses"
 )
 
@@ -42,8 +43,14 @@ func GetShortLink(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
+		expiresAt, timeError := futureTime.FindFutureTime(urlRequest.ExpiresAt)
+
+		if timeError != nil {
+			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(timeError))
+		}
+
 		//handle url,alias,expires at format
-		shortUrl, err := storage.ShortenUrl(urlRequest.LongUrl, urlRequest.Alias, urlRequest.ExpiresAt, urlRequest.UserId)
+		shortUrl, err := storage.ShortenUrl(urlRequest.LongUrl, urlRequest.Alias, expiresAt, urlRequest.UserId)
 
 		if err != nil {
 			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(err))
