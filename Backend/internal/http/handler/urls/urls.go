@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/Niranjan0524/backend/internal/auth"
 	"github.com/Niranjan0524/backend/internal/storage"
 	"github.com/Niranjan0524/backend/internal/types"
 	"github.com/Niranjan0524/backend/internal/utils/futureTime"
@@ -49,8 +50,15 @@ func GetShortLink(storage storage.Storage) http.HandlerFunc {
 			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(timeError))
 		}
 
+		userId := req.Context().Value(auth.UserIDKey)
+		userIdValue, ok := userId.(string)
+
+		if !ok || userId == "" {
+			responses.WriteJson(res, http.StatusUnauthorized, responses.GeneralError(errors.New("user id not found")))
+			return
+		}
 		//handle url,alias,expires at format
-		shortUrl, err := storage.ShortenUrl(urlRequest.LongUrl, urlRequest.Alias, expiresAt, urlRequest.UserId)
+		shortUrl, err := storage.ShortenUrl(urlRequest.LongUrl, urlRequest.Alias, expiresAt, &userIdValue)
 
 		if err != nil {
 			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(err))

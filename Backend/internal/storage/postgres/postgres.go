@@ -54,7 +54,37 @@ func New(cfg *config.Config) (*Postgres, error) {
 }
 
 func (s *Postgres) ShortenUrl(longUrl string, alias *string, expiresAt *time.Time, userId *string) (string, error) {
+	shortCode := ""
 
-	return "This is short url", nil
+	if alias != nil && *alias != "" {
+		shortCode = *alias
+	} else {
+		shortCode = generateShortCode(7)
+	}
 
+	query := `
+		INSERT INTO urls (short_code , long_url,user_id,expires_at)
+		VALUES ($1,$2,$3,$4)
+		RETURNING short_code
+	`
+
+	err := s.Db.QueryRow(query, shortCode, longUrl, userId, expiresAt).Scan(&shortCode)
+
+	if err != nil {
+		return "", err
+	}
+
+	return shortCode, nil
+
+}
+
+func generateShortCode(length int) string {
+	const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = chars[time.Now().UnixNano()%int64(len(chars))]
+	}
+
+	return string(b)
 }

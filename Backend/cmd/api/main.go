@@ -16,9 +16,15 @@ import (
 	"github.com/Niranjan0524/backend/internal/http/handler/urls"
 	"github.com/Niranjan0524/backend/internal/storage/postgres"
 	"github.com/gorilla/handlers"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Println("No .env file found")
+	}
 
 	slog.Info("Welcome to main func")
 
