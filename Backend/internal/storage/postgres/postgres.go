@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Niranjan0524/backend/internal/config"
+	"github.com/Niranjan0524/backend/internal/storage"
 	_ "github.com/lib/pq"
 )
 
@@ -87,4 +88,39 @@ func generateShortCode(length int) string {
 	}
 
 	return string(b)
+}
+
+func (s *Postgres) GetAllUrlData(userId string) ([]storage.UrlResponse, error) {
+
+	rows, err := s.Db.Query(`
+        SELECT short_code, long_url, created_at, expires_at
+        FROM urls
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+    `, userId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	urls := []storage.UrlResponse{}
+
+	for rows.Next() {
+		var item storage.UrlResponse
+
+		err := rows.Scan(
+			&item.ShortURL,
+			&item.LongURL,
+			&item.CreatedAt,
+			&item.ExpiresAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		urls = append(urls, item)
+	}
+
+	return urls, rows.Err()
 }

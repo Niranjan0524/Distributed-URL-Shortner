@@ -56,6 +56,7 @@ func main() {
 
 	router.HandleFunc("GET /health", urls.HealthCheck())
 	router.HandleFunc("POST /api/shortenUrl", auth.VerifyUser(urls.GetShortLink(storage)))
+	router.HandleFunc("GET /api/getPastUrls", auth.VerifyUser(urls.GetPastUrls(storage)))
 
 	//server
 

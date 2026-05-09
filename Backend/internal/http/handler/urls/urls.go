@@ -82,3 +82,25 @@ func GetShortLink(storage storage.Storage) http.HandlerFunc {
 		responses.WriteJson(res, http.StatusCreated, shortUrl)
 	}
 }
+
+func GetPastUrls(storage storage.Storage) http.HandlerFunc {
+
+	return func(res http.ResponseWriter, req *http.Request) {
+		userId := req.Context().Value(auth.UserIDKey)
+
+		userIdValue, ok := userId.(string)
+
+		if !ok || userId == "" {
+			responses.WriteJson(res, http.StatusUnauthorized, responses.GeneralError(errors.New("user id not found")))
+			return
+		}
+
+		data, err := storage.GetAllUrlData(userIdValue)
+
+		if err != nil {
+			responses.WriteJson(res, http.StatusInternalServerError, err)
+		}
+
+		responses.WriteJson(res, http.StatusOK, data)
+	}
+}
