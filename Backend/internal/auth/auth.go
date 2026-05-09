@@ -26,14 +26,14 @@ func VerifyUser(next http.Handler) http.HandlerFunc {
 			return
 		}
 
-		token := strings.TrimPrefix(authHeader, "Bearer ")
+		authParts := strings.Fields(authHeader)
 
-		if token == authHeader {
-			responses.WriteJson(res, http.StatusNetworkAuthenticationRequired, "No token found")
+		if len(authParts) != 2 || !strings.EqualFold(authParts[0], "Bearer") || authParts[1] == "" {
+			responses.WriteJson(res, http.StatusUnauthorized, "No token found")
 			return
 		}
 
-		user, err := verifySupabaseToken(token)
+		user, err := verifySupabaseToken(authParts[1])
 
 		if err != nil {
 			fmt.Println(err)

@@ -11,7 +11,6 @@ export const AuthProvider = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       
-      const token=session?.access_token;
       // console.log("jwt Token",token);
       setLoading(false);
     });
@@ -26,7 +25,7 @@ export const AuthProvider = ({ children }) => {
 
   const getToken=async()=>{
 
-    const {data} =await supabase.auth?.getSession();
+    const {data} = await supabase.auth.getSession();
     return data.session?.access_token;
   }
 

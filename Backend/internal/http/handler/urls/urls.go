@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 
@@ -28,7 +29,6 @@ func GetShortLink(storage storage.Storage) http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 
 		slog.Info("Received the url info")
-		fmt.Println("URL data", req.Body)
 
 		if req.Body == nil {
 			responses.WriteJson(res, http.StatusBadRequest, responses.GeneralError(errors.New("Body is required")))
@@ -39,8 +39,22 @@ func GetShortLink(storage storage.Storage) http.HandlerFunc {
 
 		errs := json.NewDecoder(req.Body).Decode(&urlRequest)
 
+		fmt.Println("URL DATA: ", urlRequest.LongUrl, urlRequest.Alias, urlRequest.ExpiresAt)
+
+		if urlRequest.LongUrl == "" || urlRequest.Alias == nil || urlRequest.ExpiresAt == "" {
+			responses.WriteJson(res, http.StatusBadRequest, "Not Enough Details")
+			return
+		}
+
+		if errors.Is(errs, io.EOF) {
+			// empty body
+			responses.WriteJson(res, http.StatusBadRequest, responses.GeneralError(errors.New("Body is required")))
+			return
+		}
+
+		fmt.Println(errs)
 		if errs != nil {
-			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(errs))
+			responses.WriteJson(res, http.StatusBadRequest, "Not Enough Resources")
 			return
 		}
 
@@ -57,6 +71,7 @@ func GetShortLink(storage storage.Storage) http.HandlerFunc {
 			responses.WriteJson(res, http.StatusUnauthorized, responses.GeneralError(errors.New("user id not found")))
 			return
 		}
+
 		//handle url,alias,expires at format
 		shortUrl, err := storage.ShortenUrl(urlRequest.LongUrl, urlRequest.Alias, expiresAt, &userIdValue)
 

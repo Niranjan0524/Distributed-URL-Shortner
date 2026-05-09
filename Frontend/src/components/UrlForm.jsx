@@ -18,7 +18,7 @@ const UrlForm = () => {
 
   
     const backendUrl=import.meta.env.VITE_BACKEND_URL;
-    let shortCode;
+    let data;
 
     const body = {
       longUrl: url,
@@ -39,19 +39,33 @@ const UrlForm = () => {
         body: JSON.stringify(body)
       });
 
-      shortCode= await res.json();
+       
+      data= await res.json();
+      if (!res.ok) {
+        const message = typeof res.json() === "string"
+          ? data
+          : data?.Error || data?.error || "Unable to shorten URL";
+        let errorMessage;
+
+        if(res.status==401 || res.status==511) errorMessage="Unauthorized";
+        else if(res.status==400) errorMessage="Bad Request";
+        else if(res.status==500) errorMessage="Internal Server Error";
+        toast.error(errorMessage);
+        return;
+      }
+      console.log(data);
       toast.success("Short Url generated")
-      console.log("ShortCode",shortCode);
+      console.log("ShortCode",data);
     } catch (err) {
       toast.error("Internal Error");
       console.error(err);
     }
     // // Placeholder — wire to real API later
-    const generated = `mkitshrt.ly/${shortCode || Math.random().toString(36).slice(2, 7)}`;
+    const generatedUrl = `mkitshrt.ly/${data || Math.random().toString(36).slice(2, 7)}`;
 
     
-    setShortUrl(generated);
-    console.log(generated)
+    setShortUrl(generatedUrl);
+    console.log(generatedUrl)
     setSubmitted(true);
   };
 
