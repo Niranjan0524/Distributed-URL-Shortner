@@ -1,5 +1,7 @@
 import { FiCopy, FiExternalLink, FiShare2, FiClock, FiLink2 } from "react-icons/fi";
 import { BsQrCode } from "react-icons/bs";
+
+
 /* ── Reusable action button ── */
 const ActionBtn = ({ icon, label, onClick, filled = false, dark = false }) => {
   if (filled) {
@@ -38,6 +40,20 @@ const ActionBtn = ({ icon, label, onClick, filled = false, dark = false }) => {
 
 /* ── Single URL card ── */
 const UrlCard = ({ shortUrl, originalUrl, createdAt }) => {
+
+  
+  const getRedirectUrl = (url) => {
+    if (/^https?:\/\//i.test(url)) {
+      return url;
+    }
+
+    const backendUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, "") || "";
+    return `${backendUrl}/${encodeURIComponent(url)}`;
+  };
+
+  const handleRedirect = (url) => {
+    window.open(getRedirectUrl(url), "_blank", "noopener,noreferrer");
+  };
   return (
     <div
       className="group relative rounded-2xl border border-border bg-bg-secondary/60 backdrop-blur-xl px-6 py-5 transition-all duration-200 hover:border-accent-red/30 hover:bg-bg-secondary/80"
@@ -59,7 +75,7 @@ const UrlCard = ({ shortUrl, originalUrl, createdAt }) => {
           <div className="min-w-0">
             {/* Short URL */}
             <a
-              href={shortUrl}
+              href={getRedirectUrl(shortUrl)}
               target="_blank"
               rel="noreferrer"
               className="block truncate text-base font-semibold leading-tight transition-colors duration-150 hover:text-accent-red"
@@ -86,7 +102,7 @@ const UrlCard = ({ shortUrl, originalUrl, createdAt }) => {
           <ActionBtn
             icon={<FiExternalLink size={14} />}
             label="Visit URL"
-            onClick={() => window.open(shortUrl, "_blank")}
+            onClick={() => handleRedirect(shortUrl)}
             filled
           />
           {/* QR */}
@@ -97,7 +113,7 @@ const UrlCard = ({ shortUrl, originalUrl, createdAt }) => {
           <ActionBtn
             icon={<FiCopy size={14} />}
             label="Copy"
-            onClick={() => navigator.clipboard.writeText(shortUrl)}
+            onClick={() => navigator.clipboard.writeText(getRedirectUrl(shortUrl))}
             dark
           />
         </div>

@@ -11,4 +11,5 @@ type UrlResponse struct {
 type Storage interface {
 	ShortenUrl(longUrl string, alias *string, expiresAt *time.Time, userId *string) (UrlResponse, error)
 	GetAllUrlData(userId string) ([]UrlResponse, error)
+	GetLongUrl(shortCode string) (string, error)
 }

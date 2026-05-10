@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -130,4 +131,25 @@ func (s *Postgres) GetAllUrlData(userId string) ([]storage.UrlResponse, error) {
 	}
 
 	return urls, rows.Err()
+}
+
+func (s *Postgres) GetLongUrl(shortCode string) (string, error) {
+
+	if shortCode == "" {
+		return "", errors.New("ShortCode not Found")
+	}
+
+	var longUrl string
+
+	err := s.Db.QueryRow(`
+		SELECT long_url
+		FROM urls
+		WHERE short_code = $1
+	`, shortCode).Scan(&longUrl)
+
+	if err != nil {
+		return "", err
+	}
+
+	return longUrl, nil
 }

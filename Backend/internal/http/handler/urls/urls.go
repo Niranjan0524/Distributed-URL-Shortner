@@ -113,3 +113,23 @@ func GetPastUrls(storage storage.Storage) http.HandlerFunc {
 		responses.WriteJson(res, http.StatusOK, data)
 	}
 }
+
+func RedirectHandler(storage storage.Storage) http.HandlerFunc {
+
+	return func(res http.ResponseWriter, req *http.Request) {
+
+		shortCode := req.PathValue("shortCode")
+
+		if shortCode == "" {
+			responses.WriteJson(res, http.StatusBadRequest, "ShortCode Not Received")
+		}
+
+		longUrl, err := storage.GetLongUrl(shortCode)
+
+		if err != nil {
+			responses.WriteJson(res, http.StatusNotFound, "No Url Found")
+		}
+
+		http.Redirect(res, req, longUrl, http.StatusFound)
+	}
+}
