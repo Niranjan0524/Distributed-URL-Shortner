@@ -54,6 +54,12 @@ const UrlCard = ({ shortUrl, originalUrl, createdAt }) => {
   const handleRedirect = (url) => {
     window.open(getRedirectUrl(url), "_blank", "noopener,noreferrer");
   };
+
+  const handleCopy=async(url)=>{
+    await navigator.clipboard.writeText(getRedirectUrl(url));
+  }
+
+  
   return (
     <div
       className="group relative rounded-2xl border border-border bg-bg-secondary/60 backdrop-blur-xl px-6 py-5 transition-all duration-200 hover:border-accent-red/30 hover:bg-bg-secondary/80"

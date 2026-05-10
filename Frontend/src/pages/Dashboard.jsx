@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import supabase from "../library/supabaseClient";
@@ -7,7 +7,7 @@ import {
   FiPlus, FiCheck, FiLogOut, FiTrendingUp, FiMousePointer, FiCalendar, FiArrowLeft
 } from "react-icons/fi";
 import toast from "react-hot-toast";
-
+import { FallingLines } from "react-loader-spinner";
 
 /* ── Dummy data ── */
 const DUMMY_LINKS = [
@@ -81,7 +81,7 @@ const StatCard = ({ icon, label, value, sub, glow }) => (
 );
 
 /* ── Link row ── */
-const LinkRow = ({ link, onDelete, onCopy, copiedId }) => (
+const LinkRow = ({ link, onDelete, onCopy, copiedId ,handleRedirect }) => (
   <div
     className="group flex items-center gap-4 rounded-2xl border border-white/[0.06] bg-[#0D0D0D] px-5 py-4 transition-all duration-200 hover:border-accent-red/25 hover:bg-[#111]"
     style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
@@ -113,7 +113,7 @@ const LinkRow = ({ link, onDelete, onCopy, copiedId }) => (
 
     {/* Clicks */}
     <div className="hidden shrink-0 flex-col items-center sm:flex">
-      <span className="text-base font-bold text-text-primary">{link.clicks.toLocaleString()}</span>
+      <span className="text-base font-bold text-text-primary">{100}</span>
       <span className="text-[10px] uppercase tracking-widest text-text-muted">clicks</span>
     </div>
 
@@ -126,16 +126,16 @@ const LinkRow = ({ link, onDelete, onCopy, copiedId }) => (
     {/* Actions */}
     <div className="flex shrink-0 items-center gap-1.5">
       <button
-        onClick={() => onCopy(link)}
+        onClick={() => onCopy(link.shortUrl,link.createdAt)}
         title="Copy short URL"
         className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.07] text-text-muted transition-all duration-150 hover:border-accent-red/30 hover:text-white"
       >
-        {copiedId === link.id
+        {copiedId === link.createdAt
           ? <FiCheck size={14} className="text-success" />
           : <FiCopy size={14} />}
       </button>
       <button
-        onClick={() => window.open(`https://${link.shortUrl}`, "_blank")}
+        onClick={() => handleRedirect(link.shortUrl)}
         title="Visit"
         className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.07] text-text-muted transition-all duration-150 hover:border-accent-red/30 hover:text-white"
       >
@@ -157,7 +157,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [links, setLinks] = useState(DUMMY_LINKS);
+  const [links, setLinks] = useState([]);
   const [inputUrl, setInputUrl] = useState("");
   const [alias, setAlias] = useState("");
   const [shortening, setShortening] = useState(false);
@@ -238,11 +238,11 @@ const Dashboard = () => {
     
   };
 
-  const handleCopy = (link) => {
-    navigator.clipboard.writeText(`https://${link.shortUrl}`);
-    setCopiedId(link.id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
+  // const handleCopy = (link) => {
+  //   navigator.clipboard.writeText(`https://${link.shortUrl}`);
+  //   setCopiedId(link.id);
+  //   setTimeout(() => setCopiedId(null), 2000);
+  // };
 
   const handleDelete = (id) => setLinks(prev => prev.filter(l => l.id !== id));
 
@@ -255,6 +255,71 @@ const Dashboard = () => {
     l.originalUrl.toLowerCase().includes(search.toLowerCase()) ||
     l.shortUrl.toLowerCase().includes(search.toLowerCase())
   );
+
+  const getRedirectUrl = (url) => {
+    if (/^https?:\/\//i.test(url)) {
+      return url;
+    }
+
+    const backendUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, "") || "";
+    return `${backendUrl}/${encodeURIComponent(url)}`;
+  };
+
+  const handleRedirect = (url) => {
+    window.open(getRedirectUrl(url), "_blank", "noopener,noreferrer");
+  };
+
+  const handleCopy=async(url,id)=>{
+    setCopiedId(id);
+    await navigator.clipboard.writeText(getRedirectUrl(url));
+    setTimeout(() => setCopiedId(null), 2000);
+  }
+ 
+  const [loadingData,setLoadingData]=useState(false);
+
+  useEffect(()=>{
+    
+    const fetchUrlsData=async ()=>{
+      const backendUrl=import.meta.env.VITE_BACKEND_URL;
+      const token=await getToken();
+      try{
+        setLoadingData(true);
+        const response =await fetch(`${backendUrl}/api/getPastUrls`,{
+          method:"GET",
+          headers:{
+            Authorization :`Bearer ${token}`
+          }
+        });
+
+        const data=await response.json();
+
+        if(!response.ok){
+          let errorMessage = "Unable to load URL history";
+          if(response.status==401 || response.status==511) errorMessage="Unauthorized";
+          else if(response.status==400) errorMessage="Bad Request";
+          else if(response.status==500) errorMessage="Internal Server Error";
+          toast.error(errorMessage);
+          return ;
+        }
+        
+        console.log(data);
+        setLinks(data);
+
+      }
+      catch(err){
+        console.log(err);
+        toast.error("Internal Server Error");
+      }
+      finally{
+        setLoadingData(false);
+      }
+    }
+
+
+    fetchUrlsData();
+    
+  },[]);
+
 
   return (
     <div className="min-h-screen" style={{ background: "#000000" }}>
@@ -409,6 +474,17 @@ const Dashboard = () => {
             />
           </div>
 
+          
+          {loadingData ? <div className="mx-auto flex w-40 flex-col items-center gap-3 py-10">
+              <FallingLines
+                color="#D91E28"
+                width="100"
+                visible={true}
+                ariaLabel="falling-circles-loading"
+              /> 
+        </div>
+        :
+        <div>
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-white/[0.06] bg-[#0D0D0D] py-16 text-text-muted">
               <FiLink2 size={32} className="opacity-30" />
@@ -417,18 +493,24 @@ const Dashboard = () => {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div
+              className="flex max-h-[32rem] flex-col gap-3 overflow-y-auto pr-2"
+              style={{ scrollbarColor: "rgba(180,18,27,0.42) transparent" }}
+            >
               {filtered.map(link => (
                 <LinkRow
-                  key={link.id}
+                  key={link.createdAt}
                   link={link}
                   onDelete={handleDelete}
                   onCopy={handleCopy}
                   copiedId={copiedId}
+                  handleRedirect={handleRedirect}
                 />
               ))}
             </div>
           )}
+        </div>
+        }
         </div>
 
       </div>

@@ -10,7 +10,7 @@ const Homebody = () => {
   const {user}=useAuth();
   const isLoggedIn = !!user;
 
-   const [urls,setUrls] =useState([]);
+  const [urls,setUrls] =useState([]);
   const {getToken} =useAuth();
   const [loadingData,setLoadingData]=useState(false);
 
@@ -60,7 +60,7 @@ const Homebody = () => {
 
     fetchUrlsData();
     
-  },[getToken]);
+  },[]);
 
 
 
