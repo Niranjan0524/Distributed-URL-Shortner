@@ -2,7 +2,7 @@ import { useState } from "react";
 import {useAuth} from "../context/AuthContext"
 import toast from "react-hot-toast"
 
-const UrlForm = () => {
+const UrlForm = ({handleUrlCreated}) => {
   const [activeTab, setActiveTab] = useState("shorten");
   const [url, setUrl] = useState("");
   const [alias, setAlias] = useState("");
@@ -55,13 +55,14 @@ const UrlForm = () => {
       }
       console.log(data);
       toast.success("Short Url generated")
-      console.log("ShortCode",data);
+      console.log("ShortCode",data.shortUrl);
+      handleUrlCreated?.(data);
     } catch (err) {
       toast.error("Internal Error");
       console.error(err);
     }
     // // Placeholder — wire to real API later
-    const generatedUrl = `mkitshrt.ly/${data || Math.random().toString(36).slice(2, 7)}`;
+    const generatedUrl = `mkitshrt.ly/${data.shortUrl || Math.random().toString(36).slice(2, 7)}`;
 
     
     setShortUrl(generatedUrl);

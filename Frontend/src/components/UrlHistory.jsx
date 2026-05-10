@@ -3,13 +3,12 @@ import { useEffect, useState } from "react";
 import UrlCard from "./UrlCard";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import {FallingLines} from "react-loader-spinner"
+import { FallingLines } from "react-loader-spinner";
+import { FiLink2 } from "react-icons/fi";
 
-const UrlHistory = () => {
+const UrlHistory = ({urls,loadingData}) => {
 
-  const [urls,setUrls] =useState([]);
-  const {getToken} =useAuth();
-  const [loadingData,setLoadingData]=useState(false);
+ 
 
   // const urls = [
   //   // {
@@ -27,82 +26,85 @@ const UrlHistory = () => {
   // ];
 
 
-  useEffect(()=>{
-
-    const fetchUrlsData=async ()=>{
-      const backendUrl=import.meta.env.VITE_BACKEND_URL;
-      const token=await getToken();
-      try{
-        setLoadingData(true);
-        const response =await fetch(`${backendUrl}/api/getPastUrls`,{
-          method:"GET",
-          headers:{
-            Authorization :`Bearer ${token}`
-          }
-        });
-
-        const data=await response.json();
-
-
-        if(!response.ok){
-          if(res.status==401 || res.status==511) errorMessage="Unauthorized";
-          else if(res.status==400) errorMessage="Bad Request";
-          else if(res.status==500) errorMessage="Internal Server Error";
-          toast.error(errorMessage);
-          return ;
-        }
-        
-        
-        
-        console.log(data);
-        setUrls(data);
-        
-   
-        // toast.success("")
-      }
-      catch(err){
-        console.log(err);
-        toast.error("Internal Server Error");
-      }
-      finally{
-        setLoadingData(false);
-      }
-    }
-
-    
-    fetchUrlsData();
-    
-  },[]);
+  
 
   
   return (
     <section className="mx-auto w-full max-w-4xl px-4 py-8">
-      {/* Section header */}
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text-primary">Recent URLs</h2>
-        <span className="rounded-full border border-border bg-bg-secondary/60 px-3 py-1 text-xs text-text-muted">
-          {urls?.length} links
-        </span>
-      </div>
+      <div
+        className="rounded-2xl border bg-bg-secondary/50 p-5 backdrop-blur-xl sm:p-6"
+        style={{
+          borderColor: "rgba(255,255,255,0.07)",
+          boxShadow:
+            "0 0 0 1px rgba(180,18,27,0.14), 0 18px 48px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04)",
+        }}
+      >
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-text-muted/50">
+              Your Links
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-text-primary">
+              Recent URLs
+            </h2>
+          </div>
 
-      {/* Cards */}
-      
-        {loadingData ? <div className="w-40 mx-auto flex flex-col gap-3">
+          <span
+            className="rounded-full border px-3 py-1 text-xs font-medium text-text-muted"
+            style={{
+              background: "rgba(26,26,26,0.72)",
+              borderColor: "rgba(180,18,27,0.22)",
+            }}
+          >
+            {urls?.length || 0} links
+          </span>
+        </div>
+
+      {
+        loadingData ? <div className="mx-auto flex w-40 flex-col items-center gap-3 py-10">
               <FallingLines
-                color="#4fa94d"
+                color="#D91E28"
                 width="100"
                 visible={true}
                 ariaLabel="falling-circles-loading"
               /> 
         </div>
-        :
-        <div className="flex flex-col gap-3">
+        : urls?.length >0 ? 
+        <div
+          className="url-history-scroll flex max-h-[28rem] flex-col gap-3 overflow-y-auto pr-2"
+          style={{ scrollbarColor: "rgba(180,18,27,0.42) transparent" }}
+        >
         {
           urls?.map((url) => (
           <UrlCard key={url.createdAt} {...url} />
         ))}
         </div>
+      :
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-12 text-center"
+        style={{
+          background: "linear-gradient(180deg, rgba(26,26,26,0.72), rgba(13,13,13,0.72))",
+          borderColor: "rgba(180,18,27,0.28)",
+        }}
+      >
+        <div
+          className="flex h-14 w-14 items-center justify-center rounded-2xl"
+          style={{
+            background: "rgba(180,18,27,0.12)",
+            border: "1px solid rgba(180,18,27,0.24)",
+            boxShadow: "0 0 24px rgba(180,18,27,0.14)",
+          }}
+        >
+          <FiLink2 size={24} className="text-accent-red" />
+        </div>
+        <h3 className="mt-4 text-base font-semibold text-text-primary">
+          No shortened URLs yet
+        </h3>
+        <p className="mt-1 max-w-sm text-sm leading-relaxed text-text-muted/70">
+          Shorten your first link above and it will appear here for quick access.
+        </p>
+      </div>
       }
+      </div>
     </section>
   );
 };

@@ -2,7 +2,9 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/Niranjan0524/backend/internal/config"
@@ -54,28 +56,33 @@ func New(cfg *config.Config) (*Postgres, error) {
 	}, nil
 }
 
-func (s *Postgres) ShortenUrl(longUrl string, alias *string, expiresAt *time.Time, userId *string) (string, error) {
+func (s *Postgres) ShortenUrl(longUrl string, alias *string, expiresAt *time.Time, userId *string) (storage.UrlResponse, error) {
 	shortCode := ""
 
-	if alias != nil && *alias != "" {
-		shortCode = *alias
+	fmt.Println("Alias:", alias)
+	fmt.Println("expires:", expiresAt)
+	if alias != nil && strings.TrimSpace(*alias) != "" {
+		shortCode = strings.TrimSpace(*alias)
 	} else {
 		shortCode = generateShortCode(7)
 	}
 
 	query := `
-		INSERT INTO urls (short_code , long_url,user_id,expires_at)
-		VALUES ($1,$2,$3,$4)
-		RETURNING short_code
+	INSERT INTO urls (short_code, long_url, user_id, expires_at)
+	VALUES ($1, $2, $3, $4)
+	RETURNING short_code, long_url, created_at, expires_at
 	`
 
-	err := s.Db.QueryRow(query, shortCode, longUrl, userId, expiresAt).Scan(&shortCode)
+	var urlObj storage.UrlResponse
+
+	err := s.Db.QueryRow(query, shortCode, longUrl, userId, expiresAt).
+		Scan(&urlObj.ShortURL, &urlObj.LongURL, &urlObj.CreatedAt, &urlObj.ExpiresAt)
 
 	if err != nil {
-		return "", err
+		return storage.UrlResponse{}, err
 	}
 
-	return shortCode, nil
+	return urlObj, nil
 
 }
 

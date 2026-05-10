@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/Niranjan0524/backend/internal/auth"
 	"github.com/Niranjan0524/backend/internal/storage"
@@ -39,9 +40,9 @@ func GetShortLink(storage storage.Storage) http.HandlerFunc {
 
 		errs := json.NewDecoder(req.Body).Decode(&urlRequest)
 
-		fmt.Println("URL DATA: ", urlRequest.LongUrl, urlRequest.Alias, urlRequest.ExpiresAt)
+		fmt.Println("URL DATA: ", urlRequest.LongUrl)
 
-		if urlRequest.LongUrl == "" || urlRequest.Alias == nil || urlRequest.ExpiresAt == "" {
+		if urlRequest.LongUrl == "" {
 			responses.WriteJson(res, http.StatusBadRequest, "Not Enough Details")
 			return
 		}
@@ -52,16 +53,19 @@ func GetShortLink(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
-		fmt.Println(errs)
 		if errs != nil {
 			responses.WriteJson(res, http.StatusBadRequest, "Not Enough Resources")
 			return
 		}
 
-		expiresAt, timeError := futureTime.FindFutureTime(urlRequest.ExpiresAt)
-
-		if timeError != nil {
-			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(timeError))
+		var expiresAt *time.Time
+		if urlRequest.ExpiresAt != "" {
+			var timeError error
+			expiresAt, timeError = futureTime.FindFutureTime(urlRequest.ExpiresAt)
+			if timeError != nil {
+				responses.WriteJson(res, http.StatusBadRequest, responses.GeneralError(timeError))
+				return
+			}
 		}
 
 		userId := req.Context().Value(auth.UserIDKey)
@@ -72,14 +76,19 @@ func GetShortLink(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
+		fmt.Println("long", urlRequest.LongUrl)
+		fmt.Println("alias", urlRequest.Alias)
+		fmt.Println("expiresAt", urlRequest.ExpiresAt)
+
 		//handle url,alias,expires at format
-		shortUrl, err := storage.ShortenUrl(urlRequest.LongUrl, urlRequest.Alias, expiresAt, &userIdValue)
+		urlObj, err := storage.ShortenUrl(urlRequest.LongUrl, urlRequest.Alias, expiresAt, &userIdValue)
 
 		if err != nil {
 			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(err))
+			return
 		}
 
-		responses.WriteJson(res, http.StatusCreated, shortUrl)
+		responses.WriteJson(res, http.StatusCreated, urlObj)
 	}
 }
 

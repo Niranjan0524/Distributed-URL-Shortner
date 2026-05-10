@@ -9,6 +9,6 @@ type UrlResponse struct {
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 }
 type Storage interface {
-	ShortenUrl(longUrl string, alias *string, expiresAt *time.Time, userId *string) (string, error)
+	ShortenUrl(longUrl string, alias *string, expiresAt *time.Time, userId *string) (UrlResponse, error)
 	GetAllUrlData(userId string) ([]UrlResponse, error)
 }
