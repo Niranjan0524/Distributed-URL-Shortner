@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -101,7 +102,7 @@ func generateShortCode(length int) string {
 func (s *Postgres) GetAllUrlData(userId string) ([]storage.UrlResponse, error) {
 
 	rows, err := s.Db.Query(`
-        SELECT short_code, long_url, created_at, expires_at
+        SELECT id,short_code, long_url, created_at, expires_at
         FROM urls
         WHERE user_id = $1
         ORDER BY created_at DESC
@@ -118,6 +119,7 @@ func (s *Postgres) GetAllUrlData(userId string) ([]storage.UrlResponse, error) {
 		var item storage.UrlResponse
 
 		err := rows.Scan(
+			&item.Id,
 			&item.ShortURL,
 			&item.LongURL,
 			&item.CreatedAt,
@@ -152,4 +154,32 @@ func (s *Postgres) GetLongUrl(shortCode string) (string, error) {
 	}
 
 	return longUrl, nil
+}
+
+func (s *Postgres) DeleteUrl(urlId string, userId string) (bool, error) {
+
+	fmt.Println(urlId, userId)
+
+	query := `
+		DELETE FROM urls
+		WHERE user_id = $1
+		AND id = $2
+		`
+
+	ctx := context.Background()
+
+	res, err := s.Db.ExecContext(ctx, query, userId, urlId)
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	fmt.Println(rowsAffected)
+
+	if rowsAffected == 0 {
+		return false, errors.New("Url Not Found")
+	}
+
+	return true, nil
 }

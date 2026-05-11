@@ -9,46 +9,7 @@ import {
 import toast from "react-hot-toast";
 import { FallingLines } from "react-loader-spinner";
 
-/* ── Dummy data ── */
-const DUMMY_LINKS = [
-  {
-    id: "1",
-    shortUrl: "mkitshrt.ly/gh-repo",
-    originalUrl: "https://github.com/parth/distributed-url-shortener",
-    clicks: 284,
-    createdAt: "Mar 1, 2026",
-  },
-  {
-    id: "2",
-    shortUrl: "mkitshrt.ly/yt-demo",
-    originalUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    clicks: 1042,
-    createdAt: "Feb 28, 2026",
-  },
-  {
-    id: "3",
-    shortUrl: "mkitshrt.ly/docs",
-    originalUrl: "https://supabase.com/docs/guides/auth/pkce-flow",
-    clicks: 57,
-    createdAt: "Feb 25, 2026",
-  },
-  {
-    id: "4",
-    shortUrl: "mkitshrt.ly/fig-ui",
-    originalUrl: "https://www.figma.com/file/XYZ/dashboard-design",
-    clicks: 319,
-    createdAt: "Feb 20, 2026",
-  },
-  {
-    id: "5",
-    shortUrl: "mkitshrt.ly/resume",
-    originalUrl: "https://drive.google.com/file/d/1ABC/view?usp=sharing",
-    clicks: 88,
-    createdAt: "Feb 15, 2026",
-  },
-];
 
-/* ── Stat card ── */
 const StatCard = ({ icon, label, value, sub, glow }) => (
   <div
     className="relative flex flex-col gap-3 rounded-2xl border border-white/[0.07] bg-[#0D0D0D] p-5 overflow-hidden"
@@ -126,11 +87,11 @@ const LinkRow = ({ link, onDelete, onCopy, copiedId ,handleRedirect }) => (
     {/* Actions */}
     <div className="flex shrink-0 items-center gap-1.5">
       <button
-        onClick={() => onCopy(link.shortUrl,link.createdAt)}
+        onClick={() => onCopy(link.shortUrl,link.Id)}
         title="Copy short URL"
         className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.07] text-text-muted transition-all duration-150 hover:border-accent-red/30 hover:text-white"
       >
-        {copiedId === link.createdAt
+        {copiedId === link.Id
           ? <FiCheck size={14} className="text-success" />
           : <FiCopy size={14} />}
       </button>
@@ -142,7 +103,7 @@ const LinkRow = ({ link, onDelete, onCopy, copiedId ,handleRedirect }) => (
         <FiExternalLink size={14} />
       </button>
       <button
-        onClick={() => onDelete(link.id)}
+        onClick={() => onDelete(link.Id)}
         title="Delete"
         className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.07] text-text-muted transition-all duration-150 hover:border-red-500/40 hover:text-red-400"
       >
@@ -244,7 +205,41 @@ const Dashboard = () => {
   //   setTimeout(() => setCopiedId(null), 2000);
   // };
 
-  const handleDelete = (id) => setLinks(prev => prev.filter(l => l.id !== id));
+  const handleDelete = async(id) => {
+
+    const token=await getToken();
+    const BackendUrl=import.meta.env.VITE_BACKEND_URL;
+    console.log("Deleting url ,id:",id);
+    try{
+      const response=await fetch(`${BackendUrl}/removeUrl/${id}`,{
+        method:"DELETE",
+        headers:{
+          Authorization:`Bearer ${token}`,
+        }
+      });
+
+      const res=await response.json();
+      
+      if(!response.ok){
+        console.log("in dashboard :handleDelete",response.Status);
+        if(response.status==404){
+          toast.error(`Url Not Found: Id: ${id} `);
+        }
+        else {
+          toast.error("Internal Server Error");
+        }
+        return ;
+      }
+
+      toast.success("Url Deleted Successfully");
+      setLinks((prevLinks)=>prevLinks.filter((link)=> link.Id!=id));
+    }
+    catch(err){
+      toast.error("Internal Server Error");
+      console.log("Error in dashBoard:",err);
+    }
+
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -499,7 +494,7 @@ const Dashboard = () => {
             >
               {filtered.map(link => (
                 <LinkRow
-                  key={link.createdAt}
+                  key={link.Id}
                   link={link}
                   onDelete={handleDelete}
                   onCopy={handleCopy}

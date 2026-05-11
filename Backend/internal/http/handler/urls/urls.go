@@ -133,3 +133,32 @@ func RedirectHandler(storage storage.Storage) http.HandlerFunc {
 		http.Redirect(res, req, longUrl, http.StatusFound)
 	}
 }
+
+func DeleteUrlWithId(storage storage.Storage) http.HandlerFunc {
+
+	return func(res http.ResponseWriter, req *http.Request) {
+		userId := req.Context().Value(auth.UserIDKey)
+
+		userIdValue, ok := userId.(string)
+
+		if !ok || userId == "" {
+			responses.WriteJson(res, http.StatusUnauthorized, responses.GeneralError(errors.New("user id not found")))
+			return
+		}
+		urlId := req.PathValue("urlId")
+		fmt.Println("urlId in fun:", urlId)
+
+		if urlId == "" {
+			responses.WriteJson(res, http.StatusBadRequest, "Url Not Found")
+		}
+
+		_, err := storage.DeleteUrl(urlId, userIdValue)
+
+		if err != nil {
+			fmt.Println(err)
+			responses.WriteJson(res, http.StatusInternalServerError, "Delete Action Aborted")
+		}
+
+		responses.WriteJson(res, http.StatusAccepted, "Url Deleted")
+	}
+}

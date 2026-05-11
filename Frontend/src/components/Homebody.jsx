@@ -4,6 +4,7 @@ import Footer from "./Footer";
 import HeroSection from "./HeroSection";
 import { useState,useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const Homebody = () => {
 
