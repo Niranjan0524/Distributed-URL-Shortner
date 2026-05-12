@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 const Homebody = () => {
 
   const {user}=useAuth();
-  const isLoggedIn = !!user;
+  const isLoggedIn= !!user;
 
   const [urls,setUrls] =useState([]);
   const {getToken} =useAuth();
@@ -58,10 +58,11 @@ const Homebody = () => {
       }
     }
 
-    if(isLoggedIn)
-    fetchUrlsData();
+    if(isLoggedIn){
+      fetchUrlsData();
+    }
     
-  },[]);
+  },[user]);
 
 
 

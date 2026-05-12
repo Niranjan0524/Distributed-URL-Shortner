@@ -12,11 +12,18 @@ type Url struct {
 }
 
 type Click struct {
-	Id        int64     `json:"id"`
-	UrlId     int64     `json:"urlId" validate:"required"`
-	ClickedAt time.Time `json:"clickedAt"`
-	IpAddress *string   `json:"ipAddress,omitempty"`
-	UserAgent *string   `json:"userAgent,omitempty"`
+	Id         int64     `json:"id"`
+	UrlId      int64     `json:"urlId" validate:"required"`
+	ClickedAt  time.Time `json:"clickedAt"`
+	IpHash     *string   `json:"ipHash,omitempty"`
+	UserAgent  *string   `json:"userAgent,omitempty"`
+	Referer    *string   `json:"referer,omitempty"`
+	Country    *string   `json:"country,omitempty"`
+	City       *string   `json:"city,omitempty"`
+	DeviceType *string   `json:"deviceType,omitempty"`
+	Browser    *string   `json:"browser,omitempty"`
+	Os         *string   `json:"os,omitempty"`
+	IsUnique   bool      `json:"isUnique"`
 }
 
 type CreateUrlRequest struct {

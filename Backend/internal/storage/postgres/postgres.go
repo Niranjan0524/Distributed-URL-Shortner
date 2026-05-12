@@ -40,13 +40,37 @@ func New(cfg *config.Config) (*Postgres, error) {
 		return nil, error
 	}
 
-	_, er := db.Exec(`CREATE TABLE IF NOT EXISTS clicks (
-    id BIGSERIAL PRIMARY KEY,
-    url_id BIGINT REFERENCES urls(id) ON DELETE CASCADE,
-    clicked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ip_address TEXT,
-    user_agent TEXT
-)`)
+	_, er := db.Exec(`
+		CREATE TABLE IF NOT EXISTS clicks (
+			id BIGSERIAL PRIMARY KEY,
+
+			url_id BIGINT NOT NULL
+				REFERENCES urls(id)
+				ON DELETE CASCADE,
+
+			clicked_at TIMESTAMP NOT NULL
+				DEFAULT CURRENT_TIMESTAMP,
+
+			ip_hash TEXT,
+
+			user_agent TEXT,
+
+			referer TEXT,
+
+			country TEXT,
+
+			city TEXT,
+
+			device_type TEXT,
+
+			browser TEXT,
+
+			os TEXT,
+
+			is_unique BOOLEAN NOT NULL
+				DEFAULT FALSE
+		)
+		`)
 
 	if er != nil {
 		slog.Error(er.Error())
