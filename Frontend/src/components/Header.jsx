@@ -29,7 +29,7 @@ const Header = () => {
         <div className="flex h-14 items-center justify-between px-5">
 
           {/* ── Logo ── */}
-          <a href="/" className="group flex items-center gap-3">
+          <button onClick={() => navigate("/")} className="group flex cursor-pointer items-center gap-3">
             <div
               className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-extrabold text-white transition-transform duration-200 group-hover:scale-110"
               style={{
@@ -42,7 +42,7 @@ const Header = () => {
             <span className="text-[15px] font-bold tracking-tight text-white">
               makeIt<span style={{ color: "#ff4d4d" }}>Short</span>
             </span>
-          </a>
+          </button>
 
           {/* ── Right Nav ── */}
           <nav className="flex items-center gap-0.5">
@@ -50,7 +50,7 @@ const Header = () => {
             {/* Analytics — always visible */}
             <a
               href="/analytics"
-              className="relative rounded-xl px-3.5 py-1.5 text-[13px] font-medium text-white/50 transition-all duration-200 hover:bg-white/[0.06] hover:text-white/90"
+              className="relative cursor-pointer rounded-xl px-3.5 py-1.5 text-[13px] font-medium text-white/50 transition-all duration-200 hover:bg-white/[0.06] hover:text-white/90"
             >
               Analytics
             </a>
@@ -60,7 +60,7 @@ const Header = () => {
                 {/* Dashboard */}
                 <a
                   href="/dashboard"
-                  className="rounded-xl px-3.5 py-1.5 text-[13px] font-medium text-white/50 transition-all duration-200 hover:bg-white/[0.06] hover:text-white/90"
+                  className="cursor-pointer rounded-xl px-3.5 py-1.5 text-[13px] font-medium text-white/50 transition-all duration-200 hover:bg-white/[0.06] hover:text-white/90"
                 >
                   Dashboard
                 </a>
@@ -70,7 +70,7 @@ const Header = () => {
 
                 {/* Profile avatar */}
                 <button
-                  className="flex h-8 w-8 items-center justify-center rounded-xl text-xs font-bold text-white transition-all duration-200 hover:scale-105"
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-xs font-bold text-white transition-all duration-200 hover:scale-105"
                   style={{
                     background: "linear-gradient(135deg, #B4121B, #E8212D)",
                     boxShadow: "0 0 12px rgba(180,18,27,0.4)",
@@ -83,7 +83,7 @@ const Header = () => {
                 {/* Logout */}
                 <button
                   onClick={handleLogout}
-                  className="ml-1 rounded-xl px-3.5 py-1.5 text-[13px] font-medium text-white/40 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
+                  className="ml-1 cursor-pointer rounded-xl px-3.5 py-1.5 text-[13px] font-medium text-white/40 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
                 >
                   Logout
                 </button>
@@ -96,7 +96,7 @@ const Header = () => {
                 {/* Log in */}
                 <a
                   href="/login"
-                  className="rounded-xl px-3.5 py-1.5 text-[13px] font-medium text-white/50 transition-all duration-200 hover:bg-white/[0.06] hover:text-white/90"
+                  className="cursor-pointer rounded-xl px-3.5 py-1.5 text-[13px] font-medium text-white/50 transition-all duration-200 hover:bg-white/[0.06] hover:text-white/90"
                 >
                   Log in
                 </a>
@@ -104,7 +104,7 @@ const Header = () => {
                 {/* Sign up */}
                 <a
                   href="/signup"
-                  className="ml-1 rounded-xl px-4 py-1.5 text-[13px] font-semibold text-white transition-all duration-200 hover:scale-[1.04] hover:brightness-110 active:scale-[0.97]"
+                  className="ml-1 cursor-pointer rounded-xl px-4 py-1.5 text-[13px] font-semibold text-white transition-all duration-200 hover:scale-[1.04] hover:brightness-110 active:scale-[0.97]"
                   style={{
                     background: "linear-gradient(135deg, #B4121B 0%, #E8212D 100%)",
                     boxShadow: "0 0 20px rgba(180,18,27,0.45), inset 0 1px 0 rgba(255,255,255,0.1)",

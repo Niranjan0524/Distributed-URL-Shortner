@@ -11,6 +11,7 @@ const UrlForm = ({handleUrlCreated}) => {
   const [shortUrl, setShortUrl] = useState("");
   const [copied, setCopied] = useState(false);
   const {getToken}=useAuth();
+  const serverDomain=import.meta.env.VITE_SERVER_DOMAIN;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,7 +63,7 @@ const UrlForm = ({handleUrlCreated}) => {
       console.error(err);
     }
 
-    const serverDomain=import.meta.env.VITE_SERVER_DOMAIN;
+    
     // // Placeholder — wire to real API later
     const generatedUrl = `${serverDomain}/${data.shortUrl || Math.random().toString(36).slice(2, 7)}`;
 
@@ -183,7 +184,7 @@ const UrlForm = ({handleUrlCreated}) => {
                       border: "1px solid rgba(255,255,255,0.08)",
                     }}
                   >
-                    <span className="font-mono text-text-primary">mkitshrt.ly</span>
+                    <span className="font-mono text-text-primary">{serverDomain}</span>
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>

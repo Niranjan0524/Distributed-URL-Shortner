@@ -4,23 +4,18 @@ const SOCIAL_LINKS = [
   {
     icon: <FiGithub size={17} />,
     label: "GitHub",
-    href: "https://github.com/",
+    href: "https://github.com/Niranjan0524",
   },
   {
     icon: <FiLinkedin size={17} />,
     label: "LinkedIn",
-    href: "https://linkedin.com/in/",
+    href: "https://www.linkedin.com/in/niranjan05/",
   },
   {
     icon: <FiGlobe size={17} />,
     label: "Portfolio",
-    href: "https://",
-  },
-  {
-    icon: <FiTwitter size={17} />,
-    label: "Twitter",
-    href: "https://twitter.com/",
-  },
+    href: "https://niranjan5.me/",
+  }
 ];
 
 const NAV_LINKS = [

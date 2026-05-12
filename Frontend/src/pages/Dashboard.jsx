@@ -89,7 +89,7 @@ const LinkRow = ({ link, onDelete, onCopy, copiedId ,handleRedirect }) => (
       <button
         onClick={() => onCopy(link.shortUrl,link.Id)}
         title="Copy short URL"
-        className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.07] text-text-muted transition-all duration-150 hover:border-accent-red/30 hover:text-white"
+        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-white/[0.07] text-text-muted transition-all duration-150 hover:border-accent-red/30 hover:text-white"
       >
         {copiedId === link.Id
           ? <FiCheck size={14} className="text-success" />
@@ -98,14 +98,14 @@ const LinkRow = ({ link, onDelete, onCopy, copiedId ,handleRedirect }) => (
       <button
         onClick={() => handleRedirect(link.shortUrl)}
         title="Visit"
-        className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.07] text-text-muted transition-all duration-150 hover:border-accent-red/30 hover:text-white"
+        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-white/[0.07] text-text-muted transition-all duration-150 hover:border-accent-red/30 hover:text-white"
       >
         <FiExternalLink size={14} />
       </button>
       <button
         onClick={() => onDelete(link.Id)}
         title="Delete"
-        className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.07] text-text-muted transition-all duration-150 hover:border-red-500/40 hover:text-red-400"
+        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-white/[0.07] text-text-muted transition-all duration-150 hover:border-red-500/40 hover:text-red-400"
       >
         <FiTrash2 size={14} />
       </button>
@@ -171,11 +171,11 @@ const Dashboard = () => {
       toast.success("Short link is ready..")
   
       console.log("ShortCode",code);
-
+      const serverDomain=import.meta.env.VITE_SERVER_DOMAIN;
       setLinks(prev => [
         {
-          id: Date.now().toString(),
-          shortUrl: `mkitshrt.ly/${code}`,
+          id: code.Id,
+          shortUrl: `${code.shortUrl}`,
           originalUrl: inputUrl.trim(),
           clicks: 0,
           createdAt: new Date().toLocaleDateString("en-US", {
@@ -191,19 +191,13 @@ const Dashboard = () => {
       console.error(err);
     }
     finally{
-       setInputUrl("");
-     setAlias("");
-     setShortening(false);
+      setInputUrl("");
+      setAlias("");
+      setShortening(false);
     }
 
     
   };
-
-  // const handleCopy = (link) => {
-  //   navigator.clipboard.writeText(`https://${link.shortUrl}`);
-  //   setCopiedId(link.id);
-  //   setTimeout(() => setCopiedId(null), 2000);
-  // };
 
   const handleDelete = async(id) => {
 
@@ -353,7 +347,7 @@ const Dashboard = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/")}
-              className="flex items-center gap-1.5 rounded-xl border border-white/[0.07] px-3 py-1.5 text-xs font-medium text-text-muted transition-all duration-150 hover:border-accent-red/30 hover:text-white"
+              className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-white/[0.07] px-3 py-1.5 text-xs font-medium text-text-muted transition-all duration-150 hover:border-accent-red/30 hover:text-white"
             >
               <FiArrowLeft size={13} /> Home
             </button>
@@ -366,7 +360,7 @@ const Dashboard = () => {
             <span className="hidden text-sm text-text-muted sm:block">{user?.email}</span>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 rounded-xl border border-white/[0.07] px-3 py-1.5 text-xs font-medium text-text-muted transition-all duration-150 hover:border-red-500/30 hover:text-red-400"
+              className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-white/[0.07] px-3 py-1.5 text-xs font-medium text-text-muted transition-all duration-150 hover:border-red-500/30 hover:text-red-400"
             >
               <FiLogOut size={13} /> Logout
             </button>
@@ -435,7 +429,7 @@ const Dashboard = () => {
             <button
               type="submit"
               disabled={shortening}
-              className="flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold uppercase tracking-widest text-white transition-all duration-150 hover:scale-[1.02] hover:brightness-110 active:scale-[0.97] disabled:opacity-60"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold uppercase tracking-widest text-white transition-all duration-150 hover:scale-[1.02] hover:brightness-110 active:scale-[0.97] disabled:opacity-60"
               style={{ background: "linear-gradient(135deg, #B4121B, #D91E28)", boxShadow: "0 0 20px rgba(180,18,27,0.35)" }}
             >
               {shortening ? (
