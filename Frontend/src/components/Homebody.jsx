@@ -58,7 +58,7 @@ const Homebody = () => {
       }
     }
 
-
+    if(isLoggedIn)
     fetchUrlsData();
     
   },[]);

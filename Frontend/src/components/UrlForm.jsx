@@ -61,8 +61,10 @@ const UrlForm = ({handleUrlCreated}) => {
       toast.error("Internal Error");
       console.error(err);
     }
+
+    const serverDomain=import.meta.env.VITE_SERVER_DOMAIN;
     // // Placeholder — wire to real API later
-    const generatedUrl = `mkitshrt.ly/${data.shortUrl || Math.random().toString(36).slice(2, 7)}`;
+    const generatedUrl = `${serverDomain}/${data.shortUrl || Math.random().toString(36).slice(2, 7)}`;
 
     
     setShortUrl(generatedUrl);
@@ -71,7 +73,7 @@ const UrlForm = ({handleUrlCreated}) => {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`https://${shortUrl}`);
+    navigator.clipboard.writeText(`http://${shortUrl}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -286,7 +288,7 @@ const UrlForm = ({handleUrlCreated}) => {
               </div>
               <div className="text-center">
                 <p className="text-sm font-medium text-text-muted">Your short link is ready</p>
-                <p className="mt-1 font-mono text-lg font-semibold text-text-primary">https://{shortUrl}</p>
+                <p className="mt-1 font-mono text-lg font-semibold text-text-primary">http://{shortUrl}</p>
               </div>
               <div className="flex w-full gap-3">
                 <button
