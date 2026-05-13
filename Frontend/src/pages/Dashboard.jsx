@@ -74,7 +74,7 @@ const LinkRow = ({ link, onDelete, onCopy, copiedId ,handleRedirect }) => (
 
     {/* Clicks */}
     <div className="hidden shrink-0 flex-col items-center sm:flex">
-      <span className="text-base font-bold text-text-primary">{100}</span>
+      <span className="text-base font-bold text-text-primary">{link.clicks}</span>
       <span className="text-[10px] uppercase tracking-widest text-text-muted">clicks</span>
     </div>
 
@@ -273,7 +273,7 @@ const Dashboard = () => {
       const token=await getToken();
       try{
         setLoadingData(true);
-        const response =await fetch(`${backendUrl}/api/getPastUrls`,{
+        const response =await fetch(`${backendUrl}/api/dashboard/urls`,{
           method:"GET",
           headers:{
             Authorization :`Bearer ${token}`

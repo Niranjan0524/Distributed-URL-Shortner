@@ -347,3 +347,46 @@ func (s *Postgres) SaveAnalytics(req *http.Request) {
 	fmt.Println("Saved Event Successfully")
 
 }
+
+func (s *Postgres) GetDashboardData(userId string) ([]storage.DashboardUrls, error) {
+	rows, err := s.Db.Query(`
+		SELECT
+			u.id,
+			u.short_code,
+			u.long_url,
+			u.created_at,
+			u.expires_at,
+			COUNT(c.id) AS clicks
+		FROM urls u
+		LEFT JOIN clicks c ON c.url_id = u.id
+		WHERE u.user_id = $1
+		GROUP BY u.id, u.short_code, u.long_url, u.created_at, u.expires_at
+		ORDER BY u.created_at DESC
+	`, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	urls := []storage.DashboardUrls{}
+
+	for rows.Next() {
+		var item storage.DashboardUrls
+
+		err := rows.Scan(
+			&item.Id,
+			&item.ShortURL,
+			&item.LongURL,
+			&item.CreatedAt,
+			&item.ExpiresAt,
+			&item.Clicks,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		urls = append(urls, item)
+	}
+
+	return urls, rows.Err()
+}

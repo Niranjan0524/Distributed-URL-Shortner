@@ -92,7 +92,7 @@ func GetShortLink(storage storage.Storage) http.HandlerFunc {
 	}
 }
 
-func GetPastUrls(storage storage.Storage) http.HandlerFunc {
+func GetRecentUrls(storage storage.Storage) http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
 		userId := req.Context().Value(auth.UserIDKey)
@@ -162,5 +162,35 @@ func DeleteUrlWithId(storage storage.Storage) http.HandlerFunc {
 		}
 
 		responses.WriteJson(res, http.StatusAccepted, "Url Deleted")
+	}
+}
+
+func GetAnalyticsUrls(storage storage.Storage) http.HandlerFunc {
+
+	return func(res http.ResponseWriter, req *http.Request) {
+
+	}
+}
+
+func GetDashboardUrls(storage storage.Storage) http.HandlerFunc {
+
+	return func(res http.ResponseWriter, req *http.Request) {
+		userId := req.Context().Value(auth.UserIDKey)
+
+		userIdValue, ok := userId.(string)
+
+		if !ok || userId == "" {
+			responses.WriteJson(res, http.StatusUnauthorized, responses.GeneralError(errors.New("user id not found")))
+			return
+		}
+
+		data, err := storage.GetDashboardData(userIdValue)
+
+		if err != nil {
+			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(err))
+			return
+		}
+
+		responses.WriteJson(res, http.StatusOK, data)
 	}
 }

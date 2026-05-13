@@ -27,7 +27,7 @@ const Homebody = () => {
       const token=await getToken();
       try{
         setLoadingData(true);
-        const response =await fetch(`${backendUrl}/api/getPastUrls`,{
+        const response =await fetch(`${backendUrl}/api/urls/recent`,{
           method:"GET",
           headers:{
             Authorization :`Bearer ${token}`
