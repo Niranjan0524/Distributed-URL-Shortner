@@ -37,3 +37,5 @@ go.work.sum
 notes.txt
 
 .gocache/
+
+geo/*.mmdb

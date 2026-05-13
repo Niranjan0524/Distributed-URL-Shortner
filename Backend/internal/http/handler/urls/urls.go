@@ -130,6 +130,8 @@ func RedirectHandler(storage storage.Storage) http.HandlerFunc {
 			responses.WriteJson(res, http.StatusNotFound, "No Url Found")
 		}
 
+		go storage.SaveAnalytics(req)
+
 		http.Redirect(res, req, longUrl, http.StatusFound)
 	}
 }

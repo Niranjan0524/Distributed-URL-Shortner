@@ -2,16 +2,20 @@ package postgres
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"strings"
 	"time"
 
+	"github.com/Niranjan0524/backend/geo"
 	"github.com/Niranjan0524/backend/internal/config"
 	"github.com/Niranjan0524/backend/internal/storage"
 	_ "github.com/lib/pq"
+	"github.com/mssola/user_agent"
 )
 
 type Postgres struct {
@@ -206,4 +210,140 @@ func (s *Postgres) DeleteUrl(urlId string, userId string) (bool, error) {
 	}
 
 	return true, nil
+}
+func GetClientIp(req *http.Request) string {
+	ip := req.Header.Get("X-Forwarded-For")
+
+	if ip == "" {
+		ip = req.RemoteAddr
+	}
+
+	return ip
+}
+
+func HashIP(ip string) string {
+
+	hash := sha256.Sum256([]byte(ip))
+
+	return fmt.Sprintf("%x", hash)
+}
+
+func ParseUserAgent(userAgentString string) (*string, *string, *string) {
+
+	ua := user_agent.New(userAgentString)
+
+	browserName, _ := ua.Browser()
+
+	os := ua.OS()
+
+	deviceType := "Desktop"
+
+	if ua.Mobile() {
+		deviceType = "Mobile"
+	}
+
+	return &deviceType, &browserName, &os
+}
+
+func (s *Postgres) CheckIfUnique(ipHash string) (bool, error) {
+
+	query := `
+		SELECT id
+		FROM clicks
+		WHERE ip_hash = $1
+		LIMIT 1
+	`
+
+	ctx := context.Background()
+
+	var id int64
+
+	err := s.Db.QueryRowContext(ctx, query, ipHash).Scan(&id)
+
+	if err != nil {
+
+		if err == sql.ErrNoRows {
+			return true, nil
+		}
+
+		return false, err
+	}
+
+	return false, nil
+}
+
+func (s *Postgres) SaveAnalytics(req *http.Request) {
+
+	shortCode := req.PathValue("shortCode")
+	query := `SELECT id From urls WHERE short_code=$1 `
+
+	urlId := 0
+	err := s.Db.QueryRow(query, shortCode).Scan(&urlId)
+
+	if err != nil {
+		fmt.Println("Error Finding urlId", err)
+		return
+	}
+
+	clickedAt := time.Now()
+
+	ip := GetClientIp(req)
+
+	ipHash := HashIP(ip)
+
+	ref := req.Referer()
+
+	country, city := geo.GetLocation(ip)
+
+	userAgent := req.UserAgent()
+	device, browser, os := ParseUserAgent(userAgent)
+
+	isUnique, err2 := s.CheckIfUnique(ipHash)
+
+	if err2 != nil {
+		fmt.Println("Error in unique check", err2)
+	}
+
+	insertQuery := `
+		INSERT INTO clicks (
+			url_id,
+			clicked_at,
+			ip_hash,
+			user_agent,
+			referer,
+			country,
+			city,
+			device_type,
+			browser,
+			os,
+			is_unique
+		)
+		VALUES (
+			$1, $2, $3, $4, $5,
+			$6, $7, $8, $9, $10,
+			$11
+		)
+	`
+
+	_, err = s.Db.Exec(
+		insertQuery,
+		urlId,
+		clickedAt,
+		ipHash,
+		userAgent,
+		ref,
+		country,
+		city,
+		device,
+		browser,
+		os,
+		isUnique,
+	)
+
+	if err != nil {
+		fmt.Println("Error Saving Analytics:", err)
+		return
+	}
+	fmt.Println("Saved Event Successfully")
+
 }

@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Niranjan0524/backend/geo"
 	"github.com/Niranjan0524/backend/internal/auth"
 	"github.com/Niranjan0524/backend/internal/config"
 	"github.com/Niranjan0524/backend/internal/http/handler/urls"
@@ -31,6 +32,10 @@ func main() {
 	cfg := config.MustLoad()
 
 	fmt.Println(cfg)
+
+	if err := geo.InitGeoDB(); err != nil {
+		slog.Warn("GeoIP database unavailable", "error", err)
+	}
 
 	//database
 
