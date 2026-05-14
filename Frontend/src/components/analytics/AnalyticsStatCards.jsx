@@ -1,15 +1,4 @@
-import { FiLink2, FiMousePointer, FiTrendingUp } from "react-icons/fi";
-
-// TODO (Backend Integration):
-// Replace the `stats` prop with data fetched from:
-//   GET /api/analytics/summary
-// Expected response shape:
-//   {
-//     totalLinks: number,       -- total shortened URLs created by the user
-//     totalClicks: number,      -- sum of all clicks across all links
-//     topLinkClicks: number,    -- click count of the single best-performing link
-//     topLinkSlug: string       -- short slug of that top link (e.g. "mkitshrt.ly/demo")
-//   }
+import { FiLink2, FiMousePointer, FiTarget, FiTrendingUp } from "react-icons/fi";
 
 const Card = ({ icon, label, value, sub, glow }) => (
   <div
@@ -48,26 +37,33 @@ const Card = ({ icon, label, value, sub, glow }) => (
 );
 
 const AnalyticsStatCards = ({ stats }) => (
-  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <Card
       icon={<FiLink2 size={16} />}
       label="Total Links"
-      value={stats.totalLinks.toLocaleString()}
+      value={(stats?.totalLinks ?? 0).toLocaleString()}
       sub="shortened URLs"
       glow={false}
     />
     <Card
       icon={<FiMousePointer size={16} />}
       label="Total Clicks"
-      value={stats.totalClicks.toLocaleString()}
+      value={(stats?.totalClicks ?? 0).toLocaleString()}
       sub="across all links"
       glow={true}
     />
     <Card
+      icon={<FiTarget size={16} />}
+      label="Unique Clicks"
+      value={(stats?.uniqueClicks ?? 0).toLocaleString()}
+      sub={`${(stats?.clicksToday ?? 0).toLocaleString()} today`}
+      glow={false}
+    />
+    <Card
       icon={<FiTrendingUp size={16} />}
       label="Top Link"
-      value={stats.topLinkClicks.toLocaleString()}
-      sub={stats.topLinkSlug}
+      value={(stats?.topLinkClicks ?? 0).toLocaleString()}
+      sub={stats?.topLinkSlug || "No clicks yet"}
       glow={false}
     />
   </div>

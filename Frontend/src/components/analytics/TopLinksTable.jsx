@@ -1,18 +1,7 @@
 import { FiExternalLink } from "react-icons/fi";
 
-// TODO (Backend Integration):
-// Replace the `links` prop with data fetched from:
-//   GET /api/analytics/top-links?limit=5
-// Expected response shape:
-//   Array<{
-//     shortSlug: string,     -- e.g. "mkitshrt.ly/demo"
-//     originalUrl: string,   -- full destination URL
-//     clicks: number         -- total click count
-//   }>
-//   Sorted by clicks descending, top 5 entries.
-
-const TopLinksTable = ({ links }) => {
-  const max = Math.max(...links.map((l) => l.clicks), 1);
+const TopLinksTable = ({ links = [], onSelect, selectedId }) => {
+  const max = Math.max(...links.map((l) => l.totalClicks ?? l.clicks ?? 0), 1);
 
   return (
     <div
@@ -21,18 +10,32 @@ const TopLinksTable = ({ links }) => {
     >
       {/* Header */}
       <div className="mb-5">
-        <h3 className="text-sm font-semibold text-text-primary">Top Links</h3>
-        <p className="mt-0.5 text-xs text-text-muted">Sorted by click count</p>
+        <h3 className="text-sm font-semibold text-text-primary">Links</h3>
+        <p className="mt-0.5 text-xs text-text-muted">Click a row to drill down</p>
       </div>
 
       {/* Rows */}
       <div className="flex flex-col gap-4">
+        {links.length === 0 && (
+          <p className="rounded-xl border border-white/[0.06] bg-black/20 px-4 py-8 text-center text-xs text-text-muted">
+            No shortened URLs found.
+          </p>
+        )}
+
         {links.map((link, i) => {
-          const pct = (link.clicks / max) * 100;
+          const clicks = link.totalClicks ?? link.clicks ?? 0;
+          const pct = (clicks / max) * 100;
           const isTop = i === 0;
+          const isSelected = selectedId === link.id;
 
           return (
-            <div key={link.shortSlug} className="group">
+            <button
+              key={link.id ?? link.shortSlug}
+              type="button"
+              onClick={() => onSelect?.(link)}
+              className="group w-full cursor-pointer rounded-xl p-2 text-left transition-all hover:bg-white/[0.03]"
+              style={isSelected ? { background: "rgba(180,18,27,0.10)", outline: "1px solid rgba(180,18,27,0.22)" } : undefined}
+            >
               {/* Row info */}
               <div className="mb-1.5 flex items-center justify-between gap-2">
                 {/* Rank + slug + external link */}
@@ -55,23 +58,20 @@ const TopLinksTable = ({ links }) => {
                       WebkitTextFillColor: "transparent",
                     }}
                   >
-                    {link.shortSlug}
+                    {link.shortSlug ?? link.shortUrl}
                   </span>
 
-                  <a
-                    href={link.originalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <span
                     className="shrink-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
                     title={link.originalUrl}
                   >
                     <FiExternalLink size={11} className="text-text-muted hover:text-white" />
-                  </a>
+                  </span>
                 </div>
 
                 {/* Click count */}
                 <span className="ml-2 shrink-0 text-xs font-bold text-text-primary">
-                  {link.clicks.toLocaleString()}
+                  {clicks.toLocaleString()}
                 </span>
               </div>
 
@@ -88,7 +88,7 @@ const TopLinksTable = ({ links }) => {
                   }}
                 />
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

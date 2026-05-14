@@ -63,7 +63,11 @@ func main() {
 	router.HandleFunc("POST /api/shortenUrl", auth.VerifyUser(urls.GetShortLink(storage)))
 	router.HandleFunc("GET /api/urls/recent", auth.VerifyUser(urls.GetRecentUrls(storage)))
 	router.HandleFunc("GET /api/dashboard/urls", auth.VerifyUser(urls.GetDashboardUrls(storage)))
-	// router.HandleFunc("GET /api/analytics/urls", auth.VerifyUser(urls.GetAnalyticsUrls(storage)))
+	router.HandleFunc("GET /api/analytics/summary", auth.VerifyUser(urls.GetAnalyticsSummary(storage)))
+	router.HandleFunc("GET /api/analytics/clicks-over-time", auth.VerifyUser(urls.GetAnalyticsClicksOverTime(storage)))
+	router.HandleFunc("GET /api/analytics/referrers", auth.VerifyUser(urls.GetAnalyticsReferrers(storage)))
+	router.HandleFunc("GET /api/analytics/links", auth.VerifyUser(urls.GetAnalyticsUrls(storage)))
+	router.HandleFunc("GET /api/analytics/urls/{urlId}", auth.VerifyUser(urls.GetUrlAnalytics(storage)))
 	router.HandleFunc("GET /{shortCode}", urls.RedirectHandler(storage))
 	router.HandleFunc("DELETE /removeUrl/{urlId}", auth.VerifyUser(urls.DeleteUrlWithId(storage)))
 

@@ -168,7 +168,114 @@ func DeleteUrlWithId(storage storage.Storage) http.HandlerFunc {
 func GetAnalyticsUrls(storage storage.Storage) http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
+		userIdValue, ok := authenticatedUserId(res, req)
+		if !ok {
+			return
+		}
 
+		data, err := storage.GetAnalyticsLinks(userIdValue, analyticsRange(req))
+		if err != nil {
+			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(err))
+			return
+		}
+
+		responses.WriteJson(res, http.StatusOK, data)
+	}
+}
+
+func authenticatedUserId(res http.ResponseWriter, req *http.Request) (string, bool) {
+	userId := req.Context().Value(auth.UserIDKey)
+	userIdValue, ok := userId.(string)
+
+	if !ok || userId == "" {
+		responses.WriteJson(res, http.StatusUnauthorized, responses.GeneralError(errors.New("user id not found")))
+		return "", false
+	}
+
+	return userIdValue, true
+}
+
+func analyticsRange(req *http.Request) string {
+	rangeName := req.URL.Query().Get("range")
+	switch rangeName {
+	case "30d", "90d", "all":
+		return rangeName
+	default:
+		return "7d"
+	}
+}
+
+func GetAnalyticsSummary(storage storage.Storage) http.HandlerFunc {
+	return func(res http.ResponseWriter, req *http.Request) {
+		userIdValue, ok := authenticatedUserId(res, req)
+		if !ok {
+			return
+		}
+
+		data, err := storage.GetAnalyticsSummary(userIdValue, analyticsRange(req))
+		if err != nil {
+			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(err))
+			return
+		}
+
+		responses.WriteJson(res, http.StatusOK, data)
+	}
+}
+
+func GetAnalyticsClicksOverTime(storage storage.Storage) http.HandlerFunc {
+	return func(res http.ResponseWriter, req *http.Request) {
+		userIdValue, ok := authenticatedUserId(res, req)
+		if !ok {
+			return
+		}
+
+		data, err := storage.GetAnalyticsClicksOverTime(userIdValue, analyticsRange(req))
+		if err != nil {
+			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(err))
+			return
+		}
+
+		responses.WriteJson(res, http.StatusOK, data)
+	}
+}
+
+func GetAnalyticsReferrers(storage storage.Storage) http.HandlerFunc {
+	return func(res http.ResponseWriter, req *http.Request) {
+		userIdValue, ok := authenticatedUserId(res, req)
+		if !ok {
+			return
+		}
+
+		data, err := storage.GetAnalyticsReferrers(userIdValue, analyticsRange(req), nil, 5)
+		if err != nil {
+			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(err))
+			return
+		}
+
+		responses.WriteJson(res, http.StatusOK, data)
+	}
+}
+
+func GetUrlAnalytics(storage storage.Storage) http.HandlerFunc {
+	return func(res http.ResponseWriter, req *http.Request) {
+		userIdValue, ok := authenticatedUserId(res, req)
+		if !ok {
+			return
+		}
+
+		urlId := req.PathValue("urlId")
+		if urlId == "" {
+			responses.WriteJson(res, http.StatusBadRequest, responses.GeneralError(errors.New("url id is required")))
+			return
+		}
+
+		data, err := storage.GetUrlAnalytics(userIdValue, urlId, analyticsRange(req))
+		if err != nil {
+			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(err))
+			return
+		}
+
+		responses.WriteJson(res, http.StatusOK, data)
 	}
 }
 

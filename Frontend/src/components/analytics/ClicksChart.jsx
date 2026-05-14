@@ -1,20 +1,9 @@
 import { useState } from "react";
 
-// TODO (Backend Integration):
-// Replace the `data` prop with data fetched from:
-//   GET /api/analytics/clicks-over-time?range=7d
-// Expected response shape:
-//   Array<{ day: string, clicks: number }>
-//   e.g. [{ day: "Mon", clicks: 120 }, { day: "Tue", clicks: 340 }, ...]
-//   Must be chronological, last 7 days.
-//
-// Future enhancements:
-//   - Add a range picker (7d / 30d / 90d) that re-fetches with a different query param
-//   - Support "unique clicks" toggle (requires backend to track unique IPs/fingerprints)
-
-const ClicksChart = ({ data }) => {
+const ClicksChart = ({ data = [], title = "Clicks Over Time", rangeLabel = "7d" }) => {
   const [hovered, setHovered] = useState(null);
   const max = Math.max(...data.map((d) => d.clicks), 1);
+  const hasData = data.some((d) => d.clicks > 0);
 
   return (
     <div
@@ -25,7 +14,7 @@ const ClicksChart = ({ data }) => {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold text-text-primary">Clicks Over Time</h3>
-          <p className="mt-0.5 text-xs text-text-muted">Last 7 days</p>
+          <p className="mt-0.5 text-xs text-text-muted">{title}</p>
         </div>
         <span
           className="rounded-xl px-3 py-1 text-[11px] font-semibold"
@@ -35,7 +24,7 @@ const ClicksChart = ({ data }) => {
             border: "1px solid rgba(180,18,27,0.22)",
           }}
         >
-          7d
+          {rangeLabel}
         </span>
       </div>
 
@@ -64,6 +53,7 @@ const ClicksChart = ({ data }) => {
                 }}
               >
                 {d.clicks.toLocaleString()}
+                {d.uniqueClicks ? ` / ${d.uniqueClicks.toLocaleString()} unique` : ""}
               </span>
 
               {/* Bar container — fills remaining height, bar grows from bottom */}
@@ -92,6 +82,12 @@ const ClicksChart = ({ data }) => {
           );
         })}
       </div>
+
+      {!hasData && (
+        <p className="mt-4 text-center text-xs text-text-muted">
+          No clicks recorded in this range yet.
+        </p>
+      )}
 
       {/* Axis line */}
       <div className="mt-2 h-px w-full" style={{ background: "rgba(255,255,255,0.05)" }} />
