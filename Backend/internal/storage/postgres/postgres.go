@@ -25,7 +25,7 @@ type Postgres struct {
 
 func New(cfg *config.Config) (*Postgres, error) {
 
-	db, err := sql.Open("postgres", cfg.Storage_path)
+	db, err := sql.Open("postgres", cfg.StoragePath)
 
 	if err != nil {
 		return nil, err

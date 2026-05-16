@@ -2,20 +2,22 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type HttpServer struct {
-	Addr string `yaml:"address" env-default:"localhost:8082"`
+	Addr string `yaml:"address" env:"ADDRESS" env-default:"localhost:8082"`
 }
 
 type Config struct {
-	Env          string `yaml:"env" env-required:"true" env-default:"production"`
-	Storage_path string `yaml:"storage_path" env-required:"true"`
-	HttpServer   `yaml:"http_server"`
+	Env         string `yaml:"env" env:"ENV" env-default:"production"`
+	StoragePath string `yaml:"storage_path" env:"DATABASE_URL" env-required:"true"`
+	HttpServer  `yaml:"http_server"`
 }
 
 func MustLoad() *Config {
@@ -30,7 +32,7 @@ func MustLoad() *Config {
 		configPath = *flags
 
 		if configPath == "" {
-			log.Fatal("config path is not set")
+			return mustLoadFromEnv()
 		}
 	}
 
@@ -46,5 +48,33 @@ func MustLoad() *Config {
 		log.Fatal("Cannot read the config file", err.Error())
 	}
 
+	applyEnvOverrides(&cfg)
+
 	return &cfg
+}
+
+func mustLoadFromEnv() *Config {
+	var cfg Config
+
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		log.Fatal("Cannot read environment config: ", err.Error())
+	}
+
+	applyEnvOverrides(&cfg)
+
+	return &cfg
+}
+
+func applyEnvOverrides(cfg *Config) {
+	if databaseURL := strings.TrimSpace(os.Getenv("DATABASE_URL")); databaseURL != "" {
+		cfg.StoragePath = databaseURL
+	}
+
+	if storagePath := strings.TrimSpace(os.Getenv("STORAGE_PATH")); storagePath != "" {
+		cfg.StoragePath = storagePath
+	}
+
+	if port := strings.TrimSpace(os.Getenv("PORT")); port != "" {
+		cfg.Addr = fmt.Sprintf(":%s", port)
+	}
 }
