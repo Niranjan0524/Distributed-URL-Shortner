@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -47,14 +48,8 @@ func main() {
 	//router
 	router := http.NewServeMux()
 
-	frontendUrl, exists := os.LookupEnv("FRONTEND_URL")
-
-	if !exists {
-		frontendUrl = "http://localhost:5173"
-	}
-
 	cors := handlers.CORS(
-		handlers.AllowedOrigins([]string{frontendUrl}),
+		handlers.AllowedOrigins(allowedOrigins()),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
 		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
 	)
@@ -107,4 +102,26 @@ func main() {
 
 	slog.Info("server shutdown successfully")
 
+}
+
+func allowedOrigins() []string {
+	origins := []string{"http://localhost:5173"}
+
+	for _, envName := range []string{"FRONTEND_URL", "FRONTEND_URLS"} {
+		raw := os.Getenv(envName)
+		if raw == "" {
+			continue
+		}
+
+		for _, origin := range strings.Split(raw, ",") {
+			origin = strings.TrimSpace(origin)
+			origin = strings.TrimRight(origin, "/")
+
+			if origin != "" {
+				origins = append(origins, origin)
+			}
+		}
+	}
+
+	return origins
 }
