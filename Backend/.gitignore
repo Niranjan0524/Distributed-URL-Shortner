@@ -38,7 +38,5 @@ notes.txt
 
 .gocache/
 
-geo/*.mmdb
-
 .gobuildcache/
 api.exe
