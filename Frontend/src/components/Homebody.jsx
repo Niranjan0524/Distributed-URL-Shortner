@@ -1,4 +1,4 @@
-import UrlForm from "./urlForm";
+import UrlForm from "./UrlForm";
 import UrlHistory from "./UrlHistory";
 import Footer from "./Footer";
 import HeroSection from "./HeroSection";

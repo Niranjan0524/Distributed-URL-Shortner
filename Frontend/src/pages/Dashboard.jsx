@@ -171,10 +171,9 @@ const Dashboard = () => {
       toast.success("Short link is ready..")
   
       console.log("ShortCode",code);
-      const serverDomain=import.meta.env.VITE_SERVER_DOMAIN;
       setLinks(prev => [
         {
-          id: code.Id,
+          Id: code.Id,
           shortUrl: `${code.shortUrl}`,
           originalUrl: inputUrl.trim(),
           clicks: 0,

@@ -2,6 +2,16 @@ import { useState } from "react";
 import {useAuth} from "../context/AuthContext"
 import toast from "react-hot-toast"
 
+const normalizeBaseUrl = (value) => {
+  const trimmed = value?.trim().replace(/\/$/, "") || "";
+
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+  const protocol = window.location.protocol === "https:" ? "https" : "http";
+  return `${protocol}://${trimmed}`;
+};
+
 const UrlForm = ({handleUrlCreated}) => {
   const [activeTab, setActiveTab] = useState("shorten");
   const [url, setUrl] = useState("");
@@ -11,14 +21,15 @@ const UrlForm = ({handleUrlCreated}) => {
   const [shortUrl, setShortUrl] = useState("");
   const [copied, setCopied] = useState(false);
   const {getToken}=useAuth();
-  const serverDomain=import.meta.env.VITE_SERVER_DOMAIN;
+  const backendUrl=normalizeBaseUrl(import.meta.env.VITE_BACKEND_URL);
+  const shortLinkBaseUrl=normalizeBaseUrl(import.meta.env.VITE_SERVER_DOMAIN || import.meta.env.VITE_BACKEND_URL);
+  const serverDomain=shortLinkBaseUrl.replace(/^https?:\/\//i, "");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!url.trim()) return;
 
   
-    const backendUrl=import.meta.env.VITE_BACKEND_URL;
     let data;
 
     const body = {
@@ -65,7 +76,7 @@ const UrlForm = ({handleUrlCreated}) => {
 
     
     // // Placeholder — wire to real API later
-    const generatedUrl = `${serverDomain}/${data.shortUrl || Math.random().toString(36).slice(2, 7)}`;
+    const generatedUrl = `${shortLinkBaseUrl}/${data.shortUrl || Math.random().toString(36).slice(2, 7)}`;
 
     
     setShortUrl(generatedUrl);
@@ -74,7 +85,7 @@ const UrlForm = ({handleUrlCreated}) => {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`http://${shortUrl}`);
+    navigator.clipboard.writeText(shortUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -289,7 +300,7 @@ const UrlForm = ({handleUrlCreated}) => {
               </div>
               <div className="text-center">
                 <p className="text-sm font-medium text-text-muted">Your short link is ready</p>
-                <p className="mt-1 font-mono text-lg font-semibold text-text-primary">http://{shortUrl}</p>
+                <p className="mt-1 font-mono text-lg font-semibold text-text-primary">{shortUrl}</p>
               </div>
               <div className="flex w-full gap-3">
                 <button
