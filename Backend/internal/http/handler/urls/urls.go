@@ -127,7 +127,53 @@ func RedirectHandler(storage storage.Storage) http.HandlerFunc {
 		longUrl, err := storage.GetLongUrl(shortCode)
 
 		if err != nil {
-			responses.WriteJson(res, http.StatusNotFound, "No Url Found")
+			if err.Error() == "URL Expired" {
+
+				html := `
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<title>Link Expired</title>
+					<style>
+						body {
+							font-family: Arial;
+							text-align: center;
+							padding-top: 100px;
+						}
+					</style>
+				</head>
+				<body>
+					<h1>410 - Link Expired</h1>
+					<p>This short URL has expired.</p>
+				</body>
+				</html>
+				`
+
+				responses.WriteHTML(res, http.StatusGone, html)
+				return
+			}
+			html := `
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<title>Not Found</title>
+					<style>
+						body {
+							font-family: Arial;
+							text-align: center;
+							padding-top: 100px;
+						}
+					</style>
+				</head>
+				<body>
+					<h1>404 - URL Not Found</h1>
+					<p>The requested short URL does not exist.</p>
+				</body>
+				</html>
+				`
+
+			responses.WriteHTML(res, http.StatusNotFound, html)
+			return
 		}
 
 		go storage.SaveAnalytics(req)

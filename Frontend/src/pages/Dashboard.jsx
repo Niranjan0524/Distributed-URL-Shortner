@@ -170,7 +170,6 @@ const Dashboard = () => {
       code=await res.json();
       toast.success("Short link is ready..")
   
-      console.log("ShortCode",code);
       setLinks(prev => [
         {
           Id: code.Id,
@@ -202,7 +201,6 @@ const Dashboard = () => {
 
     const token=await getToken();
     const BackendUrl=import.meta.env.VITE_BACKEND_URL;
-    console.log("Deleting url ,id:",id);
     try{
       const response=await fetch(`${BackendUrl}/removeUrl/${id}`,{
         method:"DELETE",
@@ -214,7 +212,6 @@ const Dashboard = () => {
       const res=await response.json();
       
       if(!response.ok){
-        console.log("in dashboard :handleDelete",response.Status);
         if(response.status==404){
           toast.error(`Url Not Found: Id: ${id} `);
         }
@@ -290,7 +287,6 @@ const Dashboard = () => {
           return ;
         }
         
-        console.log(data);
         setLinks(data);
 
       }

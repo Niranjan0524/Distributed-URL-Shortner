@@ -45,7 +45,6 @@ const Homebody = () => {
           return ;
         }
         
-        console.log(data);
         setUrls(data);
 
       }

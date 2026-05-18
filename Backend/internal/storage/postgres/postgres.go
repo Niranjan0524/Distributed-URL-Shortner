@@ -171,23 +171,26 @@ func (s *Postgres) GetLongUrl(shortCode string) (string, error) {
 	}
 
 	var longUrl string
+	var expiryTime time.Time
 
 	err := s.Db.QueryRow(`
-		SELECT long_url
+		SELECT long_url,expires_at
 		FROM urls
 		WHERE short_code = $1
-	`, shortCode).Scan(&longUrl)
+	`, shortCode).Scan(&longUrl, &expiryTime)
 
 	if err != nil {
 		return "", err
+	}
+
+	if !time.Now().Before(expiryTime) {
+		return "", errors.New("URL Expired")
 	}
 
 	return longUrl, nil
 }
 
 func (s *Postgres) DeleteUrl(urlId string, userId string) (bool, error) {
-
-	fmt.Println(urlId, userId)
 
 	query := `
 		DELETE FROM urls
