@@ -90,8 +90,6 @@ func New(cfg *config.Config) (*Postgres, error) {
 func (s *Postgres) ShortenUrl(longUrl string, alias *string, expiresAt *time.Time, userId *string) (storage.UrlResponse, error) {
 	shortCode := ""
 
-	fmt.Println("Alias:", alias)
-	fmt.Println("expires:", expiresAt)
 	if alias != nil && strings.TrimSpace(*alias) != "" {
 		shortCode = strings.TrimSpace(*alias)
 	} else {
@@ -171,7 +169,7 @@ func (s *Postgres) GetLongUrl(shortCode string) (string, error) {
 	}
 
 	var longUrl string
-	var expiryTime time.Time
+	var expiryTime *time.Time
 
 	err := s.Db.QueryRow(`
 		SELECT long_url,expires_at
@@ -180,10 +178,11 @@ func (s *Postgres) GetLongUrl(shortCode string) (string, error) {
 	`, shortCode).Scan(&longUrl, &expiryTime)
 
 	if err != nil {
+		fmt.Println("err in db", err)
 		return "", err
 	}
 
-	if !time.Now().Before(expiryTime) {
+	if expiryTime != nil && time.Now().After(*expiryTime) {
 		return "", errors.New("URL Expired")
 	}
 
@@ -206,8 +205,6 @@ func (s *Postgres) DeleteUrl(urlId string, userId string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
-	fmt.Println(rowsAffected)
 
 	if rowsAffected == 0 {
 		return false, errors.New("Url Not Found")
@@ -349,7 +346,6 @@ func (s *Postgres) SaveAnalytics(req *http.Request) {
 		fmt.Println("Error Saving Analytics:", err)
 		return
 	}
-	fmt.Println("Saved Event Successfully")
 
 }
 

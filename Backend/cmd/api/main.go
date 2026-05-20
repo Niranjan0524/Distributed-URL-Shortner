@@ -19,9 +19,27 @@ import (
 	"github.com/Niranjan0524/backend/internal/storage/postgres"
 	"github.com/gorilla/handlers"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
+
+	rdb := redis.NewClient((&redis.Options{Addr: "localhost:6379"}))
+
+	ctx := context.Background()
+
+	rdbErr := rdb.Set(ctx, "test", "hello redis", 0).Err()
+	if rdbErr != nil {
+		panic(rdbErr)
+	}
+
+	someValue, valErr := rdb.Get(ctx, "parth").Result()
+
+	if valErr != nil {
+		panic(valErr)
+	}
+
+	fmt.Println("From redis cache memory", someValue)
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -63,7 +81,7 @@ func main() {
 	router.HandleFunc("GET /api/analytics/referrers", auth.VerifyUser(urls.GetAnalyticsReferrers(storage)))
 	router.HandleFunc("GET /api/analytics/links", auth.VerifyUser(urls.GetAnalyticsUrls(storage)))
 	router.HandleFunc("GET /api/analytics/urls/{urlId}", auth.VerifyUser(urls.GetUrlAnalytics(storage)))
-	router.HandleFunc("GET /{shortCode}", urls.RedirectHandler(storage))
+	router.HandleFunc("GET /{shortCode}", urls.RedirectHandler(storage, rdb))
 	router.HandleFunc("DELETE /removeUrl/{urlId}", auth.VerifyUser(urls.DeleteUrlWithId(storage)))
 
 	//server

@@ -1,6 +1,7 @@
 package urls
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"github.com/Niranjan0524/backend/internal/types"
 	"github.com/Niranjan0524/backend/internal/utils/futureTime"
 	"github.com/Niranjan0524/backend/internal/utils/responses"
+	"github.com/redis/go-redis/v9"
 )
 
 func HealthCheck() http.HandlerFunc {
@@ -114,7 +116,7 @@ func GetRecentUrls(storage storage.Storage) http.HandlerFunc {
 	}
 }
 
-func RedirectHandler(storage storage.Storage) http.HandlerFunc {
+func RedirectHandler(storage storage.Storage, redis *redis.Client) http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
 
@@ -124,7 +126,19 @@ func RedirectHandler(storage storage.Storage) http.HandlerFunc {
 			responses.WriteJson(res, http.StatusBadRequest, "ShortCode Not Received")
 		}
 
+		val, valErr := redis.Get(context.Background(), shortCode).Result()
+
+		if valErr == nil {
+			fmt.Println("got from redis")
+			go storage.SaveAnalytics(req)
+			// Cache hit
+			http.Redirect(res, req, val, http.StatusFound)
+			return
+		}
+
 		longUrl, err := storage.GetLongUrl(shortCode)
+
+		fmt.Println("url in urls", longUrl)
 
 		if err != nil {
 			if err.Error() == "URL Expired" {
@@ -176,6 +190,12 @@ func RedirectHandler(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
+		redis.Set(
+			context.Background(),
+			shortCode,
+			longUrl,
+			time.Hour,
+		)
 		go storage.SaveAnalytics(req)
 
 		http.Redirect(res, req, longUrl, http.StatusFound)
