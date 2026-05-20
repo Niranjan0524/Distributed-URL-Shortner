@@ -24,26 +24,18 @@ import (
 
 func main() {
 
-	rdb := redis.NewClient((&redis.Options{Addr: "localhost:6379"}))
-
-	ctx := context.Background()
-
-	rdbErr := rdb.Set(ctx, "test", "hello redis", 0).Err()
-	if rdbErr != nil {
-		panic(rdbErr)
-	}
-
-	someValue, valErr := rdb.Get(ctx, "parth").Result()
-
-	if valErr != nil {
-		panic(valErr)
-	}
-
-	fmt.Println("From redis cache memory", someValue)
-
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Println("No .env file found")
+	}
+
+	ctx := context.Background()
+	rdb := newRedisClient()
+
+	if err := rdb.Ping(ctx).Err(); err != nil {
+		slog.Warn("Redis unavailable", "error", err)
+	} else {
+		slog.Info("Redis connected")
 	}
 
 	slog.Info("Welcome to main func")
@@ -120,6 +112,20 @@ func main() {
 
 	slog.Info("server shutdown successfully")
 
+}
+
+func newRedisClient() *redis.Client {
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		return redis.NewClient(&redis.Options{Addr: "localhost:6379"})
+	}
+
+	opt, err := redis.ParseURL(redisURL)
+	if err != nil {
+		log.Fatal("Invalid REDIS_URL:", err)
+	}
+
+	return redis.NewClient(opt)
 }
 
 func allowedOrigins() []string {
