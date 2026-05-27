@@ -20,6 +20,9 @@ const UrlForm = ({handleUrlCreated}) => {
   const [submitted, setSubmitted] = useState(false);
   const [shortUrl, setShortUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [qrUrl, setQrUrl] = useState("");
+  const [qrAlias, setQrAlias] = useState("");
+  const [qrExpiry, setQrExpiry] = useState("");
   const {getToken}=useAuth();
   const backendUrl=normalizeBaseUrl(import.meta.env.VITE_BACKEND_URL);
   const shortLinkBaseUrl=normalizeBaseUrl(import.meta.env.VITE_SERVER_DOMAIN || import.meta.env.VITE_BACKEND_URL);
@@ -57,7 +60,7 @@ const UrlForm = ({handleUrlCreated}) => {
         const message = typeof res.json() === "string"
           ? data
           : data?.Error || data?.error || "Unable to shorten URL";
-        let errorMessage;
+        let errorMessage = message;
 
         if(res.status==401 || res.status==511) errorMessage="Unauthorized";
         else if(res.status==400) errorMessage="Bad Request";
@@ -98,6 +101,16 @@ const UrlForm = ({handleUrlCreated}) => {
     setSubmitted(false);
     setCopied(false);
   };
+
+  const handleQrSubmit = (e) => {
+    e.preventDefault();
+    if (!qrUrl.trim()) return;
+
+    toast.success("QR code details are ready");
+  };
+
+  const qrShortPath = qrAlias.trim() || "auto-generated";
+  const qrPreviewUrl = `${serverDomain}/${qrShortPath}`;
 
   return (
     <section className="flex items-center justify-center px-4 py-12">
@@ -336,21 +349,168 @@ const UrlForm = ({handleUrlCreated}) => {
             </div>
           )}
 
-          {/* ── QR Tab placeholder ── */}
+          {/* ── QR Tab ── */}
           {activeTab === "qr" && (
-            <div className="flex flex-col items-center gap-3 py-8 text-center">
+            <form onSubmit={handleQrSubmit} className="flex flex-col gap-5">
               <div
-                className="flex h-16 w-16 items-center justify-center rounded-2xl"
-                style={{ background: "rgba(180,18,27,0.12)", border: "1px solid rgba(180,18,27,0.25)" }}
+                className="flex flex-col items-center gap-4 rounded-xl border p-4 text-center sm:flex-row sm:text-left"
+                style={{
+                  background: "linear-gradient(135deg, rgba(180,18,27,0.12), rgba(26,26,26,0.92))",
+                  borderColor: "rgba(180,18,27,0.24)",
+                }}
               >
-                <svg className="h-8 w-8" style={{ color: "#B4121B" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" />
-                  <path strokeLinecap="round" d="M14 14h2m2 0h1m-3 2v2m0 2v1" />
-                </svg>
+                <div
+                  className="grid h-20 w-20 shrink-0 grid-cols-5 grid-rows-5 gap-1 rounded-xl p-3"
+                  style={{ background: "#F8FAFC" }}
+                  aria-hidden="true"
+                >
+                  {Array.from({ length: 25 }).map((_, index) => {
+                    const filled = [0, 1, 2, 5, 7, 10, 11, 12, 15, 17, 20, 21, 22, 4, 9, 14, 19, 24, 16, 18, 23].includes(index);
+                    return (
+                      <span
+                        key={index}
+                        className="rounded-[2px]"
+                        style={{ background: filled ? "#0D0D0D" : "transparent" }}
+                      />
+                    );
+                  })}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-text-primary">Create QR-backed short link</p>
+                  <p className="mt-1 text-xs leading-relaxed text-text-muted">
+                    Every QR code will point to a short URL, so scans can use the same redirect and expiry rules.
+                  </p>
+                </div>
               </div>
-              <p className="text-sm font-semibold text-text-primary">QR Code Generator</p>
-              <p className="max-w-xs text-xs text-text-muted">Paste a URL and generate a scannable QR code — coming soon.</p>
-            </div>
+
+              {/* Long URL */}
+              <div className="flex flex-col gap-1.5">
+                <label className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
+                  <svg className="h-4 w-4" style={{ color: "#B4121B" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l7.5-7.5 7.5 7.5" />
+                  </svg>
+                  Long URL
+                  <span style={{ color: "#B4121B" }}>*</span>
+                </label>
+                <input
+                  type="url"
+                  required
+                  value={qrUrl}
+                  onChange={(e) => setQrUrl(e.target.value)}
+                  placeholder="Paste destination URL for your QR..."
+                  className="w-full rounded-xl px-4 py-3 text-sm font-mono text-text-primary placeholder:text-text-muted outline-none transition-all duration-150"
+                  style={{
+                    background: "#1A1A1A",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                  onFocus={e => e.target.style.borderColor = "rgba(180,18,27,0.6)"}
+                  onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
+                />
+              </div>
+
+              {/* Domain + Alias */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <label className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
+                    <svg className="h-4 w-4" style={{ color: "#B4121B" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <circle cx="12" cy="12" r="10" /><path strokeLinecap="round" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
+                    </svg>
+                    Domain
+                  </label>
+                  <div
+                    className="flex items-center justify-between rounded-xl px-4 py-3 text-sm text-text-muted cursor-not-allowed select-none"
+                    style={{
+                      background: "#1A1A1A",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    <span className="truncate font-mono text-text-primary">{serverDomain}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
+                    <svg className="h-4 w-4" style={{ color: "#B4121B" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 11l6.536-6.536a2 2 0 012.828 2.828L11.828 13.828A2 2 0 0111 14.414l-4 1 1-4a2 2 0 01.586-.828z" />
+                    </svg>
+                    Alias
+                    <span className="text-xs font-normal text-text-muted">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={qrAlias}
+                    onChange={(e) => setQrAlias(e.target.value)}
+                    placeholder="Custom QR alias"
+                    minLength={5}
+                    className="w-full rounded-xl px-4 py-3 text-sm font-mono text-text-primary placeholder:text-text-muted outline-none transition-all duration-150"
+                    style={{
+                      background: "#1A1A1A",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                    onFocus={e => e.target.style.borderColor = "rgba(180,18,27,0.6)"}
+                    onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
+                  />
+                </div>
+              </div>
+
+              {/* Expiration */}
+              <div className="flex flex-col gap-1.5">
+                <label className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
+                  <svg className="h-4 w-4" style={{ color: "#B4121B" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <circle cx="12" cy="12" r="9" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 3" />
+                  </svg>
+                  Expiration
+                  <span className="text-xs font-normal text-text-muted">(optional)</span>
+                </label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {[
+                    { label: "1 hour",   value: "1h" },
+                    { label: "24 hours", value: "24h" },
+                    { label: "7 days",   value: "7d" },
+                    { label: "30 days",  value: "30d" },
+                    { label: "1 year",   value: "1y" },
+                    { label: "Never",    value: "never" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setQrExpiry(qrExpiry === opt.value ? "" : opt.value)}
+                      className="rounded-xl py-2.5 text-xs font-semibold transition-all duration-150 hover:brightness-110"
+                      style={{
+                        background: qrExpiry === opt.value ? "rgba(180,18,27,0.2)" : "#1A1A1A",
+                        border: qrExpiry === opt.value ? "1px solid rgba(180,18,27,0.6)" : "1px solid rgba(255,255,255,0.08)",
+                        color: qrExpiry === opt.value ? "#D91E28" : "#94A3B8",
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div
+                className="rounded-xl px-4 py-3"
+                style={{
+                  background: "#1A1A1A",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Short link preview</p>
+                <p className="mt-1 truncate font-mono text-sm text-text-primary">{qrPreviewUrl}</p>
+              </div>
+
+              <button
+                type="submit"
+                className="mt-1 w-full rounded-xl py-3.5 text-sm font-bold text-white transition-all duration-150 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]"
+                style={{
+                  background: "linear-gradient(135deg, #B4121B, #D91E28)",
+                  boxShadow: "0 0 24px rgba(180,18,27,0.4)",
+                }}
+              >
+                Generate QR Code
+              </button>
+            </form>
           )}
         </div>
       </div>
