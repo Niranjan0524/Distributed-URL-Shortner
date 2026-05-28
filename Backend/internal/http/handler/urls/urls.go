@@ -8,6 +8,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/Niranjan0524/backend/internal/auth"
@@ -16,6 +17,7 @@ import (
 	"github.com/Niranjan0524/backend/internal/utils/futureTime"
 	"github.com/Niranjan0524/backend/internal/utils/responses"
 	"github.com/redis/go-redis/v9"
+	"github.com/skip2/go-qrcode"
 )
 
 func HealthCheck() http.HandlerFunc {
@@ -24,6 +26,114 @@ func HealthCheck() http.HandlerFunc {
 		slog.Info("Helth check successfull")
 		slog.Info("System up")
 		res.Write([]byte("All ok"))
+	}
+}
+
+func GenerateQrCode(s storage.Storage) http.HandlerFunc {
+
+	return func(res http.ResponseWriter, req *http.Request) {
+		slog.Info("Received the url info")
+
+		if req.Body == nil {
+			responses.WriteJson(res, http.StatusBadRequest, responses.GeneralError(errors.New("Body is required")))
+			return
+		}
+
+		var urlRequest types.CreateUrlRequest
+
+		errs := json.NewDecoder(req.Body).Decode(&urlRequest)
+
+		fmt.Println("URL DATA: ", urlRequest.LongUrl)
+
+		if urlRequest.LongUrl == "" {
+			responses.WriteJson(res, http.StatusBadRequest, "Not Enough Details")
+			return
+		}
+
+		if errors.Is(errs, io.EOF) {
+			// empty body
+			responses.WriteJson(res, http.StatusBadRequest, responses.GeneralError(errors.New("Body is required")))
+			return
+		}
+
+		if errs != nil {
+			responses.WriteJson(res, http.StatusBadRequest, "Not Enough Resources")
+			return
+		}
+
+		var expiresAt *time.Time
+		if urlRequest.ExpiresAt != "" {
+			var timeError error
+			expiresAt, timeError = futureTime.FindFutureTime(urlRequest.ExpiresAt)
+			if timeError != nil {
+				responses.WriteJson(res, http.StatusBadRequest, responses.GeneralError(timeError))
+				return
+			}
+		}
+
+		userId := req.Context().Value(auth.UserIDKey)
+		userIdValue, ok := userId.(string)
+
+		if !ok || userId == "" {
+			responses.WriteJson(res, http.StatusUnauthorized, responses.GeneralError(errors.New("user id not found")))
+			return
+		}
+
+		fmt.Println("long", urlRequest.LongUrl)
+		fmt.Println("alias", urlRequest.Alias)
+		fmt.Println("expiresAt", urlRequest.ExpiresAt)
+
+		//handle url,alias,expires at format
+		urlObj, err := s.ShortenUrl(urlRequest.LongUrl, urlRequest.Alias, expiresAt, &userIdValue)
+
+		if err != nil {
+			responses.WriteJson(res, http.StatusInternalServerError, responses.GeneralError(err))
+			return
+		}
+
+		var qrObj storage.QrResponse
+
+		qrObj.QrUrl = "/api/urls/" + urlObj.ShortURL + "/qr"
+
+		responses.WriteJson(res, http.StatusCreated, qrObj)
+
+	}
+}
+
+func GetQrCode(s storage.Storage) http.HandlerFunc {
+
+	return func(res http.ResponseWriter, req *http.Request) {
+
+		shortCode := req.PathValue("shortCode")
+		backendUrl := os.Getenv("BACKEND_URL")
+
+		fmt.Println("in GetQr", shortCode, backendUrl)
+		shortUrl := backendUrl + `/` + shortCode
+
+		var png []byte
+		png, err := qrcode.Encode(shortUrl, qrcode.Medium, 256)
+
+		if err != nil {
+			http.Error(
+				res,
+				"Failed to generate QR",
+				http.StatusInternalServerError,
+			)
+			return
+		}
+
+		res.Header().Set(
+			"Content-Type", "image/png",
+		)
+
+		res.WriteHeader(http.StatusOK)
+
+		_, err = res.Write(png)
+
+		if err != nil {
+			fmt.Println("Error Writing PNG:", err)
+			return
+		}
 	}
 }
 

@@ -13,6 +13,15 @@ type UrlResponse struct {
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 }
 
+type QrResponse struct {
+	Id        int        `json:"Id"`
+	ShortURL  string     `json:"shortUrl"`
+	LongURL   string     `json:"originalUrl"`
+	CreatedAt time.Time  `json:"createdAt"`
+	QrUrl     string     `json:"qrUrl"`
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+}
+
 type Click struct {
 	Id         int64     `json:"id"`
 	UrlId      int64     `json:"urlId" validate:"required"`

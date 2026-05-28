@@ -61,7 +61,7 @@ const Homebody = () => {
       fetchUrlsData();
     }
     
-  },[]);
+  },[user]);
 
 
 
