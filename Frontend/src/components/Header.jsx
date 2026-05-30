@@ -1,11 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import supabase from "../library/supabaseClient";
-
+import { Triangle } from "react-loader-spinner";
+import { useState } from "react";
 const Header = () => {
   const { user } = useAuth();
   const isLoggedIn = !!user;
   const navigate = useNavigate();
+  const [logginOut,setLoggingOut] =useState(false);
 
   const displayName =
     user?.user_metadata?.full_name?.split(" ")[0] ||
@@ -13,11 +15,30 @@ const Header = () => {
     "U";
 
   const handleLogout = async () => {
+    setLoggingOut(true);
     await supabase.auth.signOut();
+    setLoggingOut(false);
     navigate("/login");
   };
 
+  
   return (
+    logginOut?(
+      <div style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh"   // full screen center
+    }}>
+      <Triangle
+        visible={true}
+        height="80"
+        width="80"
+        color="#4fa94d"
+        ariaLabel="triangle-loading"
+      />
+    </div>
+    ):
     <div className="fixed top-4 left-0 right-0 z-50 px-4">
       <header
         className="mx-auto max-w-5xl rounded-2xl border border-white/[0.08] bg-black/70 backdrop-blur-2xl"
