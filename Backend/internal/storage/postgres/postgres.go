@@ -2,11 +2,13 @@ package postgres
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"fmt"
 	"log/slog"
+	"math/big"
 	"net/http"
 	neturl "net/url"
 	"strings"
@@ -120,9 +122,9 @@ func generateShortCode(length int) string {
 
 	b := make([]byte, length)
 	for i := range b {
-		b[i] = chars[time.Now().UnixNano()%int64(len(chars))]
+		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(chars))))
+		b[i] = chars[n.Int64()]
 	}
-
 	return string(b)
 }
 
