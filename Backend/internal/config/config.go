@@ -17,6 +17,8 @@ type HttpServer struct {
 type Config struct {
 	Env         string `yaml:"env" env:"ENV" env-default:"production"`
 	StoragePath string `yaml:"storage_path" env:"DATABASE_URL" env-required:"true"`
+	MongoURI    string `yaml:"mongo_uri" env:"MONGO_URI"`
+	DBName      string `yaml:"db_name" env:"DB_NAME"`
 	HttpServer  `yaml:"http_server"`
 }
 

@@ -111,7 +111,6 @@ const LinkDetails = ({ data, loading }) => {
   }
 
   const getLimitedUrl = (originalLink) => {
-    console.log(originalLink);
     if (!originalLink) return "";
 
     if (originalLink.length > 100) {

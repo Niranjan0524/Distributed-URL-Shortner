@@ -16,7 +16,7 @@ import (
 	"github.com/Niranjan0524/backend/internal/auth"
 	"github.com/Niranjan0524/backend/internal/config"
 	"github.com/Niranjan0524/backend/internal/http/handler/urls"
-	"github.com/Niranjan0524/backend/internal/storage/postgres"
+	"github.com/Niranjan0524/backend/internal/storage/mongo"
 	"github.com/gorilla/handlers"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
@@ -50,7 +50,8 @@ func main() {
 
 	//database
 
-	storage, err := postgres.New(cfg)
+	// storage, err := postgres.New(cfg)
+	storage, err := mongo.New(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
