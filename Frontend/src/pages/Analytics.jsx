@@ -110,6 +110,18 @@ const LinkDetails = ({ data, loading }) => {
     );
   }
 
+  const getLimitedUrl = (originalLink) => {
+    console.log(originalLink);
+    if (!originalLink) return "";
+
+    if (originalLink.length > 100) {
+      return originalLink.slice(0, 80) + "...";
+    }
+
+    return originalLink;
+  };
+
+
   return (
     <div className="flex flex-col gap-6">
       <div className="rounded-2xl border border-white/[0.07] bg-[#0D0D0D] p-6">
@@ -122,10 +134,10 @@ const LinkDetails = ({ data, loading }) => {
               WebkitTextFillColor: "transparent",
             }}
           >
-            {data.url.shortUrl}
+            {data?.url?.shortUrl}
           </p>
-          <p className="mt-1 truncate text-xs text-text-muted" title={data.url.originalUrl}>
-            {data.url.originalUrl}
+          <p className="mt-1 truncate text-xs text-text-muted">
+            { getLimitedUrl(data?.url?.originalUrl)}
           </p>
         </div>
 
@@ -148,12 +160,12 @@ const LinkDetails = ({ data, loading }) => {
       <div className="rounded-2xl border border-white/[0.07] bg-[#0D0D0D] p-6">
         <h3 className="mb-4 text-sm font-semibold text-text-primary">Recent Clicks</h3>
         <div className="flex flex-col gap-3">
-          {data.recentClicks.length === 0 && (
+          {data?.recentClicks?.length === 0 && (
             <p className="rounded-xl border border-white/[0.06] bg-black/20 px-4 py-8 text-center text-xs text-text-muted">
               No recent click events in this range.
             </p>
           )}
-          {data.recentClicks.map((click, index) => (
+          {data?.recentClicks?.map((click, index) => (
             <div
               key={`${click.clickedAt}-${index}`}
               className="grid grid-cols-1 gap-2 rounded-xl border border-white/[0.06] bg-black/20 px-4 py-3 text-xs text-text-muted sm:grid-cols-4"

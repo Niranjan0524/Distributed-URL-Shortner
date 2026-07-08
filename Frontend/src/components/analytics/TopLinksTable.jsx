@@ -3,6 +3,7 @@ import { FiExternalLink } from "react-icons/fi";
 const TopLinksTable = ({ links = [], onSelect, selectedId }) => {
   const max = Math.max(...links.map((l) => l.totalClicks ?? l.clicks ?? 0), 1);
 
+  
   return (
     <div
       className="rounded-2xl border border-white/[0.07] bg-[#0D0D0D] p-6"
