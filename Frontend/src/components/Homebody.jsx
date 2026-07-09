@@ -76,7 +76,7 @@ const Homebody = () => {
       </div>
 
       {/* ── History & Footer (unchanged) ── */}
-      {isLoggedIn ? <UrlHistory urls={urls} loadingData={loadingData}/> :<div> </div>}
+      {isLoggedIn ? <UrlHistory urls={urls} loadingData={loadingData}/> :<></>}
       <Footer />
     </div>
   );

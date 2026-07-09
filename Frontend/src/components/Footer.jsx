@@ -30,7 +30,7 @@ const Footer = () => {
 
   return (
     <footer
-      className="relative mt-auto border-t border-border bg-bg-secondary/40 backdrop-blur-xl"
+      className=" mt-auto border-t border-border bg-bg-secondary/40 backdrop-blur-xl"
       style={{ boxShadow: "0 -1px 0 rgba(180,18,27,0.08)" }}
     >
       {/* faint top glow line */}

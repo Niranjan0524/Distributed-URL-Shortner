@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   FiClock,
   FiCopy,
@@ -139,7 +140,7 @@ const UrlCard = ({ shortUrl, originalUrl, createdAt }) => {
   return (
     <>
       <div
-        className="group relative rounded-2xl border border-border bg-bg-secondary/60 backdrop-blur-xl px-6 py-5 transition-all duration-200 hover:border-accent-red/30 hover:bg-bg-secondary/80"
+        className="group rounded-2xl border border-border bg-bg-secondary/60 backdrop-blur-xl px-6 py-5 transition-all duration-200 hover:border-accent-red/30 hover:bg-bg-secondary/80"
         style={{ boxShadow: "0 2px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(180,18,27,0.06)" }}
       >
         <div className="flex items-start justify-between gap-4">
@@ -213,8 +214,8 @@ const UrlCard = ({ shortUrl, originalUrl, createdAt }) => {
         </div>
       </div>
 
-      {isQrModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+      {isQrModalOpen && createPortal(
+        <div className="fixed inset-0 z-[10000] flex min-h-dvh items-center justify-center bg-black/70 px-4 py-10 backdrop-blur-sm">
           <div
             className="relative w-full max-w-md rounded-2xl border border-border bg-bg-secondary p-6 text-center shadow-2xl"
             style={{ boxShadow: "0 24px 80px rgba(0,0,0,0.72), 0 0 0 1px rgba(180,18,27,0.12)" }}
@@ -274,7 +275,8 @@ const UrlCard = ({ shortUrl, originalUrl, createdAt }) => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

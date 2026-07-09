@@ -71,7 +71,7 @@ const UrlHistory = ({urls,loadingData}) => {
         </div>
         : urls?.length >0 ? 
         <div
-          className="url-history-scroll flex max-h-[28rem] flex-col gap-3 overflow-y-auto pr-2"
+          className="url-history-scroll relative flex max-h-[100rem] flex-col gap-3 overflow-y-auto pr-2"
           style={{ scrollbarColor: "rgba(180,18,27,0.42) transparent" }}
         >
         {
