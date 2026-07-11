@@ -128,7 +128,7 @@ const Footer = () => {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              React & Go
+              React , Go ,  Redis, Postgres & Mongo
             </span>
           </p>
         </div>

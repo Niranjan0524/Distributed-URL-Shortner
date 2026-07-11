@@ -65,7 +65,8 @@ func main() {
 		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
 	)
 
-	router.HandleFunc("GET /health", urls.HealthCheck())
+	router.HandleFunc("GET /health/mainServer", urls.HealthCheck())
+	router.HandleFunc("GET /health/redis", urls.RedisHealthCheck(rdb))
 	router.HandleFunc("POST /api/shortenUrl", auth.VerifyUser(urls.GetShortLink(storage)))
 	router.HandleFunc("GET /api/urls/{shortCode}/qr", auth.VerifyUser(urls.GetQrCode(storage)))
 	router.HandleFunc("GET /api/urls/recent", auth.VerifyUser(urls.GetRecentUrls(storage)))

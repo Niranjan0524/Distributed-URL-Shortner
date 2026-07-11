@@ -20,12 +20,42 @@ import (
 	"github.com/skip2/go-qrcode"
 )
 
+type HealthStatus struct {
+	Key    string
+	Status string
+}
+
 func HealthCheck() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
 		slog.Info("Helth check successfull")
 		slog.Info("System up")
-		res.Write([]byte("All ok"))
+		var systemHealth HealthStatus
+
+		systemHealth.Key = "system"
+		systemHealth.Status = "up"
+
+		responses.WriteJson(res, http.StatusOK, systemHealth)
+	}
+}
+
+func RedisHealthCheck(redis *redis.Client) http.HandlerFunc {
+	return func(res http.ResponseWriter, req *http.Request) {
+		slog.Info("Checking Redis Health")
+
+		ctx := context.Background()
+		var redisHealth HealthStatus
+
+		redisHealth.Key = "redis"
+		err := redis.Ping(ctx).Err()
+
+		if err != nil {
+			redisHealth.Status = "down"
+			responses.WriteJson(res, http.StatusServiceUnavailable, redisHealth)
+			return
+		}
+		redisHealth.Status = "up"
+		responses.WriteJson(res, http.StatusOK, redisHealth)
 	}
 }
 
