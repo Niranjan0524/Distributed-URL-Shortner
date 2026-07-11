@@ -53,7 +53,7 @@ function App() {
         toast.success(server,"is up");
       }
       else{
-        toast.error(server,"is down");
+        toast("😴 Redis is waking up... things might be a little slow for the next few seconds.");
       }
     }
     catch(err){
